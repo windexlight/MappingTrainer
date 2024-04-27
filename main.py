@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (QDialog, QFileDialog, QHeaderView, QInputDialog,
                              QLabel, QMessageBox, QTableWidgetItem, QAbstractButton, QCheckBox)
 from windowMain import Ui_Form
 from keynames import keyNames
-from scancodenames import scancodes
+from scancodenames import *
 
 class mainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -26,26 +26,34 @@ class mainWindow(QtWidgets.QMainWindow):
     def keyPressEvent(self, event: QKeyEvent):
         if not event.isAutoRepeat():
             k = event.nativeScanCode() #.key()
-            if k not in scancodes:
+            if k not in scancodeSet:
                 print(F"Unrecognized scancode {k} pressed")
                 return
+            k = scancode(k)
+            if k in scancodeTranslations:
+                k = scancodeTranslations[k]
             if k not in self.keysPressed:
                 self.keysPressed.append(k)
             self.updateKeysPressed()
-            print(F"{scancodes[k]} pressed")
+            print(F"{scancodeNames[k]} pressed")
 
     def keyReleaseEvent(self, event: QKeyEvent):
         if not event.isAutoRepeat():
             k = event.nativeScanCode() #.key()
-            if k not in scancodes:
+            if k not in scancodeSet:
                 print(F"Unrecognized scancode {k} released")
                 return
+            k = scancode(k)
+            if k in scancodeTranslations:
+                k = scancodeTranslations[k]
             self.keysPressed = [i for i in self.keysPressed if i != k]
             self.updateKeysPressed()
-            print(F"{scancodes[k]} released")
+            print(F"{scancodeNames[k]} released")
 
     def sayKeysPressed(self):
-        return '+'.join(map(lambda k: scancodes[k], self.keysPressed))
+        if (combo := tuple(self.keysPressed)) in scancodeNames:
+            return scancodeNames[combo]
+        return '+'.join(map(lambda k: scancodeNames[k], self.keysPressed))
     
     def updateKeysPressed(self):
         self.ui.label_keyPrompt.setText(self.sayKeysPressed())
