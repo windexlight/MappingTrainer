@@ -11,12 +11,23 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_Form(object):
-    def setupUi(self, Form):
-        Form.setObjectName("Form")
-        Form.resize(491, 387)
-        self.label_keyPrompt = QtWidgets.QLabel(Form)
-        self.label_keyPrompt.setGeometry(QtCore.QRect(90, 290, 281, 81))
+class Ui_mainWindow(object):
+    def setupUi(self, mainWindow):
+        mainWindow.setObjectName("mainWindow")
+        mainWindow.resize(403, 208)
+        self.verticalLayout = QtWidgets.QVBoxLayout(mainWindow)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.label_keysPressed = QtWidgets.QLabel(mainWindow)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(18)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_keysPressed.setFont(font)
+        self.label_keysPressed.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_keysPressed.setObjectName("label_keysPressed")
+        self.verticalLayout.addWidget(self.label_keysPressed)
+        self.label_keyPrompt = QtWidgets.QLabel(mainWindow)
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(18)
@@ -25,11 +36,13 @@ class Ui_Form(object):
         self.label_keyPrompt.setFont(font)
         self.label_keyPrompt.setAlignment(QtCore.Qt.AlignCenter)
         self.label_keyPrompt.setObjectName("label_keyPrompt")
+        self.verticalLayout.addWidget(self.label_keyPrompt)
 
-        self.retranslateUi(Form)
-        QtCore.QMetaObject.connectSlotsByName(Form)
+        self.retranslateUi(mainWindow)
+        QtCore.QMetaObject.connectSlotsByName(mainWindow)
 
-    def retranslateUi(self, Form):
+    def retranslateUi(self, mainWindow):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
-        self.label_keyPrompt.setText(_translate("Form", "KEY TO TYPE"))
+        mainWindow.setWindowTitle(_translate("mainWindow", "Mapping Trainer"))
+        self.label_keysPressed.setText(_translate("mainWindow", "KEYS PRESSED"))
+        self.label_keyPrompt.setText(_translate("mainWindow", "KEY TO TYPE"))

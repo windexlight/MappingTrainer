@@ -151,6 +151,7 @@ scancodeNames = {
 
     scancode.Backspace: "Backspace",
     scancode.Tab: "Tab",
+
     scancode.Q: "q",
     scancode.W: "w",
     scancode.E: "e",
@@ -289,3 +290,9 @@ scancodeNames = {
     scancode.Wake: "Wake",
 }
 
+def processScancode(k) -> scancode:
+    if k in scancodeSet:
+        k = scancode(k)
+        if k in scancodeTranslations:
+            k = scancodeTranslations[k]
+        return k

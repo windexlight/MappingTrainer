@@ -1,5 +1,6 @@
 import asyncio
 import os
+import random
 
 import qasync
 from PyQt5 import QtWidgets
@@ -7,17 +8,19 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QColor, QKeyEvent
 from PyQt5.QtWidgets import (QDialog, QFileDialog, QHeaderView, QInputDialog,
                              QLabel, QMessageBox, QTableWidgetItem, QAbstractButton, QCheckBox)
-from windowMain import Ui_Form
+from windowMain import Ui_mainWindow
 from keynames import keyNames
-from scancodenames import *
+from scancodes import *
+from combos import *
 
-class mainWindow(QtWidgets.QMainWindow):
+class mainWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        self.ui = Ui_Form()
+        self.ui = Ui_mainWindow()
         self.ui.setupUi(self)
         self.keysPressed = []
         self.setFocusPolicy(Qt.StrongFocus)
+        self.updateKeyPrompt()
 
     def focusOutEvent(self, event):
         self.keysPressed.clear()
@@ -25,38 +28,40 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def keyPressEvent(self, event: QKeyEvent):
         if not event.isAutoRepeat():
-            k = event.nativeScanCode() #.key()
-            if k not in scancodeSet:
-                print(F"Unrecognized scancode {k} pressed")
+            sc = event.nativeScanCode()
+            if not (k := processScancode(sc)):
+                print(F"Unrecognized scancode {sc} pressed")
                 return
-            k = scancode(k)
-            if k in scancodeTranslations:
-                k = scancodeTranslations[k]
             if k not in self.keysPressed:
                 self.keysPressed.append(k)
             self.updateKeysPressed()
-            print(F"{scancodeNames[k]} pressed")
+            if self.keysPressed == self.keyPrompt:
+                self.updateKeyPrompt()
+            # print(F"{scancodeNames[k]} pressed")
 
     def keyReleaseEvent(self, event: QKeyEvent):
         if not event.isAutoRepeat():
-            k = event.nativeScanCode() #.key()
-            if k not in scancodeSet:
-                print(F"Unrecognized scancode {k} released")
+            sc = event.nativeScanCode()
+            if not (k := processScancode(sc)):
+                print(F"Unrecognized scancode {sc} released")
                 return
-            k = scancode(k)
-            if k in scancodeTranslations:
-                k = scancodeTranslations[k]
             self.keysPressed = [i for i in self.keysPressed if i != k]
             self.updateKeysPressed()
-            print(F"{scancodeNames[k]} released")
+            if self.keysPressed == self.keyPrompt:
+                self.updateKeyPrompt()
+            # print(F"{scancodeNames[k]} released")
 
-    def sayKeysPressed(self):
-        if (combo := tuple(self.keysPressed)) in scancodeNames:
+    def makeKeyString(self, keys):
+        if (combo := tuple(keys)) in scancodeNames:
             return scancodeNames[combo]
-        return '+'.join(map(lambda k: scancodeNames[k], self.keysPressed))
+        return '+'.join(map(lambda k: scancodeNames[k], keys))
     
     def updateKeysPressed(self):
-        self.ui.label_keyPrompt.setText(self.sayKeysPressed())
+        self.ui.label_keysPressed.setText(self.makeKeyString(self.keysPressed))
+
+    def updateKeyPrompt(self):
+        self.keyPrompt = keyCombos[random.randrange(len(keyCombos))]
+        self.ui.label_keyPrompt.setText(self.makeKeyString(self.keyPrompt))
 
 
 if __name__ == "__main__":
