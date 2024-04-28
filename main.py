@@ -9,15 +9,15 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QColor, QKeyEvent
 from PyQt5.QtWidgets import (QDialog, QFileDialog, QHeaderView, QInputDialog,
                              QLabel, QMessageBox, QTableWidgetItem, QAbstractButton, QCheckBox)
-from windowMain import Ui_mainWindow
+from ui_mainWindow import Ui_MainWindow
 from keynames import keyNames
 from scancodes import *
 from combos import *
 
-class mainWindow(QtWidgets.QWidget):
+class mainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = Ui_mainWindow()
+        self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.keysPressed = []
         self.setFocusPolicy(Qt.StrongFocus)

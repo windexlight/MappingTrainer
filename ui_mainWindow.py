@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main.ui'
+# Form implementation generated from reading ui file 'mainWindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -11,13 +11,15 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_mainWindow(object):
-    def setupUi(self, mainWindow):
-        mainWindow.setObjectName("mainWindow")
-        mainWindow.resize(403, 208)
-        self.verticalLayout = QtWidgets.QVBoxLayout(mainWindow)
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(527, 292)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.label_keysPerSecond = QtWidgets.QLabel(mainWindow)
+        self.label_keysPerSecond = QtWidgets.QLabel(self.centralwidget)
         self.label_keysPerSecond.setMaximumSize(QtCore.QSize(16777215, 16))
         font = QtGui.QFont()
         font.setFamily("Cascadia Code")
@@ -26,7 +28,7 @@ class Ui_mainWindow(object):
         self.label_keysPerSecond.setAlignment(QtCore.Qt.AlignCenter)
         self.label_keysPerSecond.setObjectName("label_keysPerSecond")
         self.verticalLayout.addWidget(self.label_keysPerSecond)
-        self.label_keysPressed = QtWidgets.QLabel(mainWindow)
+        self.label_keysPressed = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("Cascadia Code")
         font.setPointSize(22)
@@ -37,7 +39,7 @@ class Ui_mainWindow(object):
         self.label_keysPressed.setAlignment(QtCore.Qt.AlignCenter)
         self.label_keysPressed.setObjectName("label_keysPressed")
         self.verticalLayout.addWidget(self.label_keysPressed)
-        self.label_keyPrompt = QtWidgets.QLabel(mainWindow)
+        self.label_keyPrompt = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("Cascadia Code")
         font.setPointSize(22)
@@ -47,12 +49,20 @@ class Ui_mainWindow(object):
         self.label_keyPrompt.setAlignment(QtCore.Qt.AlignCenter)
         self.label_keyPrompt.setObjectName("label_keyPrompt")
         self.verticalLayout.addWidget(self.label_keyPrompt)
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 527, 26))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(mainWindow)
-        QtCore.QMetaObject.connectSlotsByName(mainWindow)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, mainWindow):
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        mainWindow.setWindowTitle(_translate("mainWindow", "Mapping Trainer"))
-        self.label_keysPerSecond.setText(_translate("mainWindow", "--"))
-        self.label_keyPrompt.setText(_translate("mainWindow", "KEY TO TYPE"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Mapping Trainer"))
+        self.label_keysPerSecond.setText(_translate("MainWindow", "--"))
+        self.label_keyPrompt.setText(_translate("MainWindow", "KEY TO TYPE"))

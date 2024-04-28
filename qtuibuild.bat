@@ -1,2 +1,2 @@
 @ECHO OFF
-pyuic5 main.ui -o windowMain.py
+pyuic5 mainWindow.ui -o ui_mainWindow.py

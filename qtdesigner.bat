@@ -1,2 +1,2 @@
 @ECHO OFF
-pyqt5-tools designer main.ui &
+pyqt5-tools designer mainWindow.ui &
