@@ -1,6 +1,7 @@
 import asyncio
 import os
 import random
+import time
 
 import qasync
 from PyQt5 import QtWidgets
@@ -20,6 +21,7 @@ class mainWindow(QtWidgets.QWidget):
         self.ui.setupUi(self)
         self.keysPressed = []
         self.setFocusPolicy(Qt.StrongFocus)
+        self.lastKeyTime = time.time() - 100
         self.updateKeyPrompt()
 
     def focusOutEvent(self, event):
@@ -62,6 +64,16 @@ class mainWindow(QtWidgets.QWidget):
     def updateKeyPrompt(self):
         self.keyPrompt = keyCombos[random.randrange(len(keyCombos))]
         self.ui.label_keyPrompt.setText(self.makeKeyString(self.keyPrompt))
+        if ((t := time.time()) - self.lastKeyTime) > 5:
+            self.startTime = t
+            self.lastKeyTime = t
+            self.totalKeysPressed = 0
+            self.ui.label_keysPerSecond.setText("--")
+        else:
+            self.lastKeyTime = t
+            self.totalKeysPressed += 1
+            self.ui.label_keysPerSecond.setText(F"{self.totalKeysPressed / (t - self.startTime):0.2f}")
+
 
 
 if __name__ == "__main__":
