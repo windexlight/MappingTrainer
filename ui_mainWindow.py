@@ -71,6 +71,10 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName("menubar")
         self.menuMode = QtWidgets.QMenu(self.menubar)
         self.menuMode.setObjectName("menuMode")
+        self.menuOptions = QtWidgets.QMenu(self.menubar)
+        self.menuOptions.setObjectName("menuOptions")
+        self.menuFile = QtWidgets.QMenu(self.menubar)
+        self.menuFile.setObjectName("menuFile")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -82,14 +86,29 @@ class Ui_MainWindow(object):
         self.actionTyping_Practice = QtWidgets.QAction(MainWindow)
         self.actionTyping_Practice.setCheckable(True)
         self.actionTyping_Practice.setObjectName("actionTyping_Practice")
+        self.actionSplit_file_by_period = QtWidgets.QAction(MainWindow)
+        self.actionSplit_file_by_period.setCheckable(True)
+        self.actionSplit_file_by_period.setChecked(True)
+        self.actionSplit_file_by_period.setObjectName("actionSplit_file_by_period")
+        self.actionStart_file_in_random_location = QtWidgets.QAction(MainWindow)
+        self.actionStart_file_in_random_location.setCheckable(True)
+        self.actionStart_file_in_random_location.setObjectName("actionStart_file_in_random_location")
+        self.actionLoad_typing_content_file = QtWidgets.QAction(MainWindow)
+        self.actionLoad_typing_content_file.setObjectName("actionLoad_typing_content_file")
         self.menuMode.addAction(self.actionKey_Practice)
         self.menuMode.addAction(self.actionTyping_Practice)
+        self.menuOptions.addAction(self.actionSplit_file_by_period)
+        self.menuOptions.addAction(self.actionStart_file_in_random_location)
+        self.menuFile.addAction(self.actionLoad_typing_content_file)
+        self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuMode.menuAction())
+        self.menubar.addAction(self.menuOptions.menuAction())
 
         self.retranslateUi(MainWindow)
         self.actionKey_Practice.toggled['bool'].connect(MainWindow.actionModeKey) # type: ignore
         self.actionTyping_Practice.toggled['bool'].connect(MainWindow.actionModeTyping) # type: ignore
         self.lineEdit.textChanged['QString'].connect(MainWindow.lineEditTextChanged) # type: ignore
+        self.actionLoad_typing_content_file.triggered.connect(MainWindow.loadTypingPromptFile) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -98,5 +117,10 @@ class Ui_MainWindow(object):
         self.label_keysPerSecond.setText(_translate("MainWindow", "--"))
         self.label_keyPrompt.setText(_translate("MainWindow", "KEY TO TYPE"))
         self.menuMode.setTitle(_translate("MainWindow", "Mode"))
+        self.menuOptions.setTitle(_translate("MainWindow", "Options"))
+        self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.actionKey_Practice.setText(_translate("MainWindow", "Key Practice"))
         self.actionTyping_Practice.setText(_translate("MainWindow", "Typing Practice"))
+        self.actionSplit_file_by_period.setText(_translate("MainWindow", "Split content file on punctuation"))
+        self.actionStart_file_in_random_location.setText(_translate("MainWindow", "Start content file in random location"))
+        self.actionLoad_typing_content_file.setText(_translate("MainWindow", "Load typing content file..."))

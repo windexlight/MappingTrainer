@@ -120,7 +120,22 @@
     <addaction name="actionKey_Practice"/>
     <addaction name="actionTyping_Practice"/>
    </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionSplit_file_by_period"/>
+    <addaction name="actionStart_file_in_random_location"/>
+   </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionLoad_typing_content_file"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuMode"/>
+   <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionKey_Practice">
@@ -140,6 +155,30 @@
    </property>
    <property name="text">
     <string>Typing Practice</string>
+   </property>
+  </action>
+  <action name="actionSplit_file_by_period">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Split content file on punctuation</string>
+   </property>
+  </action>
+  <action name="actionStart_file_in_random_location">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Start content file in random location</string>
+   </property>
+  </action>
+  <action name="actionLoad_typing_content_file">
+   <property name="text">
+    <string>Load typing content file...</string>
    </property>
   </action>
  </widget>
@@ -193,10 +232,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionLoad_typing_content_file</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadTypingPromptFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>145</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>actionModeKey(bool)</slot>
   <slot>actionModeTyping(bool)</slot>
   <slot>lineEditTextChanged(QString)</slot>
+  <slot>loadTypingPromptFile()</slot>
  </slots>
 </ui>

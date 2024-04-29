@@ -2,6 +2,8 @@ import asyncio
 import os
 import random
 import time
+import re
+from pathlib import Path
 
 import qasync
 from PyQt5 import QtWidgets
@@ -26,10 +28,12 @@ class mainWindow(QtWidgets.QMainWindow):
         self.ui.lineEdit.setStyleSheet("font-family: Aptos; font-weight: normal; font-size: 11pt;")
         self.keysPressed = []
         self.setFocusPolicy(Qt.StrongFocus)
-        self.lastKeyTime = time.time() - 100
+        self.lastKeyTime = None
         self.generateNewKeyPrompt()
         self.updatingKeyPrompt = False
         self.basePromptStyle = self.ui.label_keyPrompt.styleSheet()
+        self.promptLines = []
+        self.promptLinesIndex = 0
 
     def focusOutEvent(self, event):
         self.keysPressed.clear()
@@ -46,21 +50,59 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def actionModeTyping(self, state: bool):
         if state:
-            inputFile = QFileDialog.getOpenFileName(self, "Choose text file", "", "Text Files (*.txt)")
-            self.typingPromptText = "The dog is dumb and it leaves much to be desired."
+            if len(self.promptLines) == 0:
+                if not self.loadTypingPromptFile():
+                    return
+            else:
+                self.ui.label_keyPrompt.setText(self.typingPromptText)
             self.ui.label_keyPrompt.setStyleSheet(self.basePromptStyle +
                 "font-family: Aptos; font-weight: normal; padding: 0.5px; font-size: 11pt; text-align: left;")
             self.ui.label_keyPrompt.setAlignment(Qt.AlignmentFlag.AlignLeft)
-            self.ui.lineEdit.clear()
             self.ui.lineEdit.setVisible(True)
             self.ui.label_keysPressed.setVisible(False)
-            self.ui.label_keyPrompt.setText(self.typingPromptText)
             self.ui.lineEdit.setFocus()
 
-    def lineEditTextChanged(self, text: str):
+    def loadTypingPromptFile(self) -> bool:
+        inputFile = QFileDialog.getOpenFileName(self, "Choose text file", "", "Text Files (*.txt)")
+        if not inputFile[0]:
+            return False
+        inputText = Path(inputFile[0]).read_text()
+        filters = r'\n'
+        if self.ui.actionSplit_file_by_period.isChecked():
+            filters = filters + r'\.\?!'
+        self.promptLines = [s.strip() for s in re.split(fr'(.+?[{filters}])', inputText)[1::2] or [inputText]]
+        self.startTime = None
+        if self.ui.actionStart_file_in_random_location.isChecked():
+            self.setTypingPromptLine(random.randrange(len(self.promptLines)))
+        else:
+            self.setTypingPromptLine(0)
         if self.ui.actionTyping_Practice.isChecked():
-            match = os.path.commonprefix([text, prompt := self.typingPromptText])
-            self.ui.label_keyPrompt.setText(F"<span style=\"color:rgb(0, 170, 0);\">{prompt[0:len(match)]}</span>{prompt[len(match):]}")
+            self.ui.lineEdit.setFocus()
+        return True
+
+    def nextTypingPromptLine(self):
+        self.setTypingPromptLine(self.promptLinesIndex + 1)
+
+    def setTypingPromptLine(self, line: int):
+        t = time.time()
+        if self.startTime:
+            self.ui.label_keysPerSecond.setText(F"KPS: {len(self.typingPromptText) / (t - self.startTime):0.2f}")
+        else:
+            self.ui.label_keysPerSecond.setText(F"KPS: --")
+        self.startTime = t
+        self.promptLinesIndex = line
+        self.typingPromptText = self.promptLines[line % len(self.promptLines)]
+        self.ui.label_keyPrompt.setText(self.typingPromptText)
+        self.ui.lineEdit.clear()
+
+    def lineEditTextChanged(self, text: str):
+        if len(text) == 1 and len(self.typingPromptText) > 1:
+            self.startTime = time.time()
+        if self.ui.actionTyping_Practice.isChecked():
+            match = os.path.commonprefix([text, p := self.typingPromptText])
+            self.ui.label_keyPrompt.setText(F"<span style=\"color:rgb(0, 170, 0);\">{p[0:len(match)]}</span>{p[len(match):]}")
+            if text == p:
+                self.nextTypingPromptLine()
 
 
     @qasync.asyncClose
@@ -114,7 +156,8 @@ class mainWindow(QtWidgets.QMainWindow):
     def generateNewKeyPrompt(self):
         self.keyPrompt = keyCombos[random.randrange(len(keyCombos))]
         self.ui.label_keyPrompt.setText(self.makeKeyString(self.keyPrompt))
-        if ((t := time.time()) - self.lastKeyTime) > 5:
+        t = time.time()
+        if (not self.lastKeyTime) or (t - self.lastKeyTime) > 5:
             self.startTime = t
             self.lastKeyTime = t
             self.totalKeysPressed = 0
