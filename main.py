@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import (QDialog, QFileDialog, QHeaderView, QInputDialog,
 from ui_mainWindow import Ui_MainWindow
 from keynames import keyNames
 from scancodes import *
-from combos import *
+import combos
 
 class mainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -29,7 +29,8 @@ class mainWindow(QtWidgets.QMainWindow):
         self.keysPressed = []
         self.setFocusPolicy(Qt.StrongFocus)
         self.lastKeyTime = None
-        self.generateNewKeyPrompt()
+        self.keyCombos = []
+        self.setKeyTypes()
         self.updatingKeyPrompt = False
         self.basePromptStyle = self.ui.label_keyPrompt.styleSheet()
         self.promptLines = []
@@ -104,6 +105,30 @@ class mainWindow(QtWidgets.QMainWindow):
             if text == p:
                 self.nextTypingPromptLine()
 
+    def keyTypeToggled(self, _: bool):
+        self.setKeyTypes()
+
+    def setKeyTypes(self):
+        self.keyCombos = []
+        if self.ui.actionCombos.isChecked():
+            self.keyCombos += combos.combos
+        if self.ui.actionFunction.isChecked():
+            self.keyCombos += combos.function
+        if self.ui.actionLowercase.isChecked():
+            self.keyCombos += combos.lowercase
+        if self.ui.actionModifiers.isChecked():
+            self.keyCombos += combos.modifiers
+        if self.ui.actionNumbers.isChecked():
+            self.keyCombos += combos.numbers
+        if self.ui.actionSpecials.isChecked():
+            self.keyCombos += combos.specials
+        if self.ui.actionSymbols.isChecked():
+            self.keyCombos += combos.symbols
+        if self.ui.actionUppercase.isChecked():
+            self.keyCombos += combos.uppercase
+        if len(self.keyCombos) == 0:
+            self.keyCombos = [scancode.Esc]
+        self.generateNewKeyPrompt()
 
     @qasync.asyncClose
     async def keyPressEvent(self, event: QKeyEvent):
@@ -154,7 +179,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.updatingKeyPrompt = False
 
     def generateNewKeyPrompt(self):
-        self.keyPrompt = keyCombos[random.randrange(len(keyCombos))]
+        self.keyPrompt = self.keyCombos[random.randrange(len(self.keyCombos))]
         self.ui.label_keyPrompt.setText(self.makeKeyString(self.keyPrompt))
         t = time.time()
         if (not self.lastKeyTime) or (t - self.lastKeyTime) > 5:

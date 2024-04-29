@@ -95,10 +95,50 @@ class Ui_MainWindow(object):
         self.actionStart_file_in_random_location.setObjectName("actionStart_file_in_random_location")
         self.actionLoad_typing_content_file = QtWidgets.QAction(MainWindow)
         self.actionLoad_typing_content_file.setObjectName("actionLoad_typing_content_file")
+        self.actionNumbers = QtWidgets.QAction(MainWindow)
+        self.actionNumbers.setCheckable(True)
+        self.actionNumbers.setChecked(True)
+        self.actionNumbers.setObjectName("actionNumbers")
+        self.actionSymbols = QtWidgets.QAction(MainWindow)
+        self.actionSymbols.setCheckable(True)
+        self.actionSymbols.setChecked(True)
+        self.actionSymbols.setObjectName("actionSymbols")
+        self.actionSpecials = QtWidgets.QAction(MainWindow)
+        self.actionSpecials.setCheckable(True)
+        self.actionSpecials.setChecked(True)
+        self.actionSpecials.setObjectName("actionSpecials")
+        self.actionLowercase = QtWidgets.QAction(MainWindow)
+        self.actionLowercase.setCheckable(True)
+        self.actionLowercase.setChecked(True)
+        self.actionLowercase.setObjectName("actionLowercase")
+        self.actionUppercase = QtWidgets.QAction(MainWindow)
+        self.actionUppercase.setCheckable(True)
+        self.actionUppercase.setChecked(True)
+        self.actionUppercase.setObjectName("actionUppercase")
+        self.actionModifiers = QtWidgets.QAction(MainWindow)
+        self.actionModifiers.setCheckable(True)
+        self.actionModifiers.setChecked(True)
+        self.actionModifiers.setObjectName("actionModifiers")
+        self.actionFunction = QtWidgets.QAction(MainWindow)
+        self.actionFunction.setCheckable(True)
+        self.actionFunction.setChecked(True)
+        self.actionFunction.setObjectName("actionFunction")
+        self.actionCombos = QtWidgets.QAction(MainWindow)
+        self.actionCombos.setCheckable(True)
+        self.actionCombos.setChecked(True)
+        self.actionCombos.setObjectName("actionCombos")
         self.menuMode.addAction(self.actionKey_Practice)
         self.menuMode.addAction(self.actionTyping_Practice)
         self.menuOptions.addAction(self.actionSplit_file_by_period)
         self.menuOptions.addAction(self.actionStart_file_in_random_location)
+        self.menuOptions.addAction(self.actionNumbers)
+        self.menuOptions.addAction(self.actionSymbols)
+        self.menuOptions.addAction(self.actionSpecials)
+        self.menuOptions.addAction(self.actionModifiers)
+        self.menuOptions.addAction(self.actionLowercase)
+        self.menuOptions.addAction(self.actionUppercase)
+        self.menuOptions.addAction(self.actionFunction)
+        self.menuOptions.addAction(self.actionCombos)
         self.menuFile.addAction(self.actionLoad_typing_content_file)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuMode.menuAction())
@@ -109,6 +149,14 @@ class Ui_MainWindow(object):
         self.actionTyping_Practice.toggled['bool'].connect(MainWindow.actionModeTyping) # type: ignore
         self.lineEdit.textChanged['QString'].connect(MainWindow.lineEditTextChanged) # type: ignore
         self.actionLoad_typing_content_file.triggered.connect(MainWindow.loadTypingPromptFile) # type: ignore
+        self.actionCombos.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
+        self.actionFunction.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
+        self.actionLowercase.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
+        self.actionModifiers.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
+        self.actionNumbers.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
+        self.actionSpecials.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
+        self.actionSymbols.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
+        self.actionUppercase.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -124,3 +172,11 @@ class Ui_MainWindow(object):
         self.actionSplit_file_by_period.setText(_translate("MainWindow", "Split content file on punctuation"))
         self.actionStart_file_in_random_location.setText(_translate("MainWindow", "Start content file in random location"))
         self.actionLoad_typing_content_file.setText(_translate("MainWindow", "Load typing content file..."))
+        self.actionNumbers.setText(_translate("MainWindow", "Numbers"))
+        self.actionSymbols.setText(_translate("MainWindow", "Symbols"))
+        self.actionSpecials.setText(_translate("MainWindow", "Specials"))
+        self.actionLowercase.setText(_translate("MainWindow", "Lowercase"))
+        self.actionUppercase.setText(_translate("MainWindow", "Uppercase"))
+        self.actionModifiers.setText(_translate("MainWindow", "Modifiers"))
+        self.actionFunction.setText(_translate("MainWindow", "Function"))
+        self.actionCombos.setText(_translate("MainWindow", "Combos"))
