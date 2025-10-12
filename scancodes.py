@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 class scancode(Enum):
     BacktickTilde = 0x29
@@ -110,6 +110,22 @@ class scancode(Enum):
     Sleep = 0x15f
     Power = 0x15e
     Wake = 0x163
+    # Mute = 0x700 # Here down are totally made up values, just to fill out ones I want from keycodes
+    # VolUp = auto()
+    # VolDown = auto()
+    # NextTrack = auto()
+    # PrevTrack = auto()
+    # Stop = auto()
+    # PlayPause = auto()
+    BrightUp = 0x700 #auto()
+    BrightDown = auto()
+    Mute = 0x120
+    VolUp = 0x130
+    VolDown = 0x12E
+    NextTrack = 0x119
+    PrevTrack = 0x110
+    Stop = 0x124
+    PlayPause = 0x122
 
 scancodeSet = set(item.value for item in scancode)
 
@@ -120,179 +136,11 @@ scancodeTranslations = {
     scancode.RWin: scancode.LWin,
 }
 
-scancodeNames = {
-    scancode.BacktickTilde: "`",
-    scancode.OneExclam: "1",
-    scancode.TwoAt: "2",
-    scancode.ThreePound: "3",
-    scancode.FourDollar: "4",
-    scancode.FivePercent: "5",
-    scancode.SixCaret: "6",
-    scancode.SevenAmpersand: "7",
-    scancode.EightAsterisk: "8",
-    scancode.NineLeftParen: "9",
-    scancode.ZeroRightParen: "0",
-    scancode.MinusUnderscore: "-",
-    scancode.EqualPlus: "=",
-
-    (scancode.LShift, scancode.BacktickTilde): "~",
-    (scancode.LShift, scancode.OneExclam): "!",
-    (scancode.LShift, scancode.TwoAt): "@",
-    (scancode.LShift, scancode.ThreePound): "#",
-    (scancode.LShift, scancode.FourDollar): "$",
-    (scancode.LShift, scancode.FivePercent): "%",
-    (scancode.LShift, scancode.SixCaret): "^",
-    (scancode.LShift, scancode.SevenAmpersand): "&",
-    (scancode.LShift, scancode.EightAsterisk): "*",
-    (scancode.LShift, scancode.NineLeftParen): "(",
-    (scancode.LShift, scancode.ZeroRightParen): ")",
-    (scancode.LShift, scancode.MinusUnderscore): "_",
-    (scancode.LShift, scancode.EqualPlus): "+",
-
-    scancode.Backspace: "Backspace",
-    scancode.Tab: "Tab",
-
-    scancode.Q: "q",
-    scancode.W: "w",
-    scancode.E: "e",
-    scancode.R: "r",
-    scancode.T: "t",
-    scancode.Y: "y",
-    scancode.U: "u",
-    scancode.I: "i",
-    scancode.O: "o",
-    scancode.P: "p",
-    scancode.LeftSquareBracket: "[",
-    scancode.RightSquareBracket: "]",
-    scancode.BackslashPipe: "\\",
-
-    (scancode.LShift, scancode.Q): "Q",
-    (scancode.LShift, scancode.W): "W",
-    (scancode.LShift, scancode.E): "E",
-    (scancode.LShift, scancode.R): "R",
-    (scancode.LShift, scancode.T): "T",
-    (scancode.LShift, scancode.Y): "Y",
-    (scancode.LShift, scancode.U): "U",
-    (scancode.LShift, scancode.I): "I",
-    (scancode.LShift, scancode.O): "O",
-    (scancode.LShift, scancode.P): "P",
-    (scancode.LShift, scancode.LeftSquareBracket): "{",
-    (scancode.LShift, scancode.RightSquareBracket): "}",
-    (scancode.LShift, scancode.BackslashPipe): "|",
-
-    scancode.CapsLock: "CapsLock",
-
-    scancode.A: "a",
-    scancode.S: "s",
-    scancode.D: "d",
-    scancode.F: "f",
-    scancode.G: "g",
-    scancode.H: "h",
-    scancode.J: "j",
-    scancode.K: "k",
-    scancode.L: "l",
-    scancode.SemicolonColon: ";",
-    scancode.SingleDoubleQuote: "'",
-
-    (scancode.LShift, scancode.A): "A",
-    (scancode.LShift, scancode.S): "S",
-    (scancode.LShift, scancode.D): "D",
-    (scancode.LShift, scancode.F): "F",
-    (scancode.LShift, scancode.G): "G",
-    (scancode.LShift, scancode.H): "H",
-    (scancode.LShift, scancode.J): "J",
-    (scancode.LShift, scancode.K): "K",
-    (scancode.LShift, scancode.L): "L",
-    (scancode.LShift, scancode.SemicolonColon): ":",
-    (scancode.LShift, scancode.SingleDoubleQuote): "\"",
-
-    scancode.nonUS1: "non-US-1",
-    scancode.Enter: "Enter",
-    scancode.LShift: "Shift",
-
-    scancode.Z: "z",
-    scancode.X: "x",
-    scancode.C: "c",
-    scancode.V: "v",
-    scancode.B: "b",
-    scancode.N: "n",
-    scancode.M: "m",
-    scancode.CommaLeftAngle: ",",
-    scancode.PeriodRightAngle: ".",
-    scancode.SlashQuestion: "/",
-
-    (scancode.LShift, scancode.Z): "Z",
-    (scancode.LShift, scancode.X): "X",
-    (scancode.LShift, scancode.C): "C",
-    (scancode.LShift, scancode.V): "V",
-    (scancode.LShift, scancode.B): "B",
-    (scancode.LShift, scancode.N): "N",
-    (scancode.LShift, scancode.M): "M",
-    (scancode.LShift, scancode.CommaLeftAngle): "<",
-    (scancode.LShift, scancode.PeriodRightAngle): ">",
-    (scancode.LShift, scancode.SlashQuestion): "?",
-
-    scancode.RShift: "RShift",
-    scancode.LCtrl: "Ctrl",
-    scancode.LAlt: "Alt",
-    scancode.Space: "Space",
-    scancode.RAlt: "RAlt",
-    scancode.RCtrl: "RCtrl",
-    scancode.Insert: "Insert",
-    scancode.Delete: "Delete",
-    scancode.Home: "Home",
-    scancode.End: "End",
-    scancode.PgUp: "PgUp",
-    scancode.PgDn: "PgDn",
-    scancode.Left: "Left",
-    scancode.Up: "Up",
-    scancode.Down: "Down",
-    scancode.Right: "Right",
-    scancode.NumLock: "NumLock",
-    scancode.KP7Home: "KP-7 / Home",
-    scancode.KP4Left: "KP-4 / Left",
-    scancode.KP1End: "KP-1 / End",
-    scancode.KPSlash: "KP-/",
-    scancode.KP8Up: "KP-8 / Up",
-    scancode.KP5: "KP-5",
-    scancode.KP2Down: "KP-2 / Down",
-    scancode.KP0Ins: "KP-0 / Ins",
-    scancode.KPAsterisk: "KP-*",
-    scancode.KP9PgUp: "KP-9 / PgUp",
-    scancode.KP6Right: "KP-6 / Right",
-    scancode.KP3PgDn: "KP-3 / PgDn",
-    scancode.KPPeriodDel: "KP-. / Del",
-    scancode.KPMinus: "KP--",
-    scancode.KPPlus: "KP-+",
-    scancode.KPEnter: "KP-Enter",
-    scancode.Esc: "Esc",
-    scancode.F1: "F1",
-    scancode.F2: "F2",
-    scancode.F3: "F3",
-    scancode.F4: "F4",
-    scancode.F5: "F5",
-    scancode.F6: "F6",
-    scancode.F7: "F7",
-    scancode.F8: "F8",
-    scancode.F9: "F9",
-    scancode.F10: "F10",
-    scancode.F11: "F11",
-    scancode.F12: "F12",
-    scancode.PrtScr: "PrtScr",
-    scancode.AltSysRq: "AltSysRq",
-    scancode.ScrollLock: "ScrollLock",
-    scancode.CtrlBreak: "CtrlBreak",
-    scancode.LWin: "Win",
-    scancode.RWin: "RWin",
-    scancode.Menu: "Menu",
-    scancode.Sleep: "Sleep",
-    scancode.Power: "Power",
-    scancode.Wake: "Wake",
-}
-
 def processScancode(k) -> scancode:
     if k in scancodeSet:
         k = scancode(k)
         if k in scancodeTranslations:
             k = scancodeTranslations[k]
         return k
+    
+SCANCODE_MODS = [scancode.LCtrl, scancode.LShift, scancode.LAlt, scancode.LWin]

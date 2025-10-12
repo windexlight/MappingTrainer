@@ -14,85 +14,245 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(527, 292)
+        MainWindow.resize(527, 345)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setSpacing(12)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.pushButton_Minus = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_Minus.setMaximumSize(QtCore.QSize(30, 16777215))
+        self.pushButton_Minus.setStyleSheet("\n"
+"          QPushButton {\n"
+"            border-radius: 5px;\n"
+"            background-color: #eee;\n"
+"            padding: 5px;\n"
+"            font-weight: 500;\n"
+"          }\n"
+"          QPushButton:hover {\n"
+"            background-color: #ddd;\n"
+"          }\n"
+"         ")
+        self.pushButton_Minus.setFlat(True)
+        self.pushButton_Minus.setObjectName("pushButton_Minus")
+        self.horizontalLayout_2.addWidget(self.pushButton_Minus)
+        self.pushButton_Plus = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_Plus.setMaximumSize(QtCore.QSize(30, 16777215))
+        self.pushButton_Plus.setStyleSheet("\n"
+"          QPushButton {\n"
+"            border-radius: 5px;\n"
+"            background-color: #eee;\n"
+"            padding: 5px;\n"
+"            font-weight: 500;\n"
+"          }\n"
+"          QPushButton:hover {\n"
+"            background-color: #ddd;\n"
+"          }\n"
+"         ")
+        self.pushButton_Plus.setFlat(True)
+        self.pushButton_Plus.setObjectName("pushButton_Plus")
+        self.horizontalLayout_2.addWidget(self.pushButton_Plus)
         self.label_keysPerSecond = QtWidgets.QLabel(self.centralwidget)
         self.label_keysPerSecond.setMaximumSize(QtCore.QSize(16777215, 16))
         font = QtGui.QFont()
         font.setFamily("Cascadia Code")
         font.setPointSize(10)
+        font.setBold(False)
+        font.setWeight(50)
         self.label_keysPerSecond.setFont(font)
+        self.label_keysPerSecond.setStyleSheet("color: #444; background: transparent;")
         self.label_keysPerSecond.setAlignment(QtCore.Qt.AlignCenter)
         self.label_keysPerSecond.setObjectName("label_keysPerSecond")
         self.horizontalLayout_2.addWidget(self.label_keysPerSecond)
         self.label_line = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_line.sizePolicy().hasHeightForWidth())
-        self.label_line.setSizePolicy(sizePolicy)
         self.label_line.setMaximumSize(QtCore.QSize(135, 16777214))
         font = QtGui.QFont()
         font.setFamily("Cascadia Code")
         font.setPointSize(10)
+        font.setBold(False)
+        font.setWeight(50)
         self.label_line.setFont(font)
+        self.label_line.setStyleSheet("color: #444; background: transparent;")
         self.label_line.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_line.setObjectName("label_line")
         self.horizontalLayout_2.addWidget(self.label_line)
         self.pushButton_Back = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_Back.setMaximumSize(QtCore.QSize(30, 16777215))
+        self.pushButton_Back.setStyleSheet("\n"
+"          QPushButton {\n"
+"            border-radius: 5px;\n"
+"            background-color: #eee;\n"
+"            padding: 5px;\n"
+"            font-weight: 500;\n"
+"          }\n"
+"          QPushButton:hover {\n"
+"            background-color: #ddd;\n"
+"          }\n"
+"         ")
+        self.pushButton_Back.setFlat(True)
         self.pushButton_Back.setObjectName("pushButton_Back")
         self.horizontalLayout_2.addWidget(self.pushButton_Back)
         self.pushButton_Next = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_Next.setMaximumSize(QtCore.QSize(30, 16777215))
+        self.pushButton_Next.setStyleSheet("\n"
+"          QPushButton {\n"
+"            border-radius: 5px;\n"
+"            background-color: #eee;\n"
+"            padding: 5px;\n"
+"            font-weight: 500;\n"
+"          }\n"
+"          QPushButton:hover {\n"
+"            background-color: #ddd;\n"
+"          }\n"
+"         ")
+        self.pushButton_Next.setFlat(True)
         self.pushButton_Next.setObjectName("pushButton_Next")
         self.horizontalLayout_2.addWidget(self.pushButton_Next)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setSpacing(8)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.label_keysPressed = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setFamily("Cascadia Code")
-        font.setPointSize(22)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_keysPressed.setFont(font)
-        self.label_keysPressed.setStyleSheet("background-color: rgb(223, 255, 255);")
-        self.label_keysPressed.setText("")
+        self.label_keysPressed.setStyleSheet("\n"
+"          background-color: #f9fbff;\n"
+"          border: 1px solid #ccc;\n"
+"          border-radius: 8px;\n"
+"          padding: 6px;\n"
+"          color: #222;\n"
+"         ")
         self.label_keysPressed.setAlignment(QtCore.Qt.AlignCenter)
         self.label_keysPressed.setObjectName("label_keysPressed")
         self.horizontalLayout.addWidget(self.label_keysPressed)
-        self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit.setAcceptDrops(False)
+        self.lineEdit = VisibleWhitespaceTextEdit(self.centralwidget)
+        self.lineEdit.setStyleSheet("\n"
+"          QPlainTextEdit {\n"
+"            background-color: #f9fbff;\n"
+"            border: 1px solid #ccc;\n"
+"            border-radius: 8px;\n"
+"            padding: 8px;\n"
+"            color: #222;\n"
+"            font-weight: normal;\n"
+"            padding: 0.5px;\n"
+"            text-align: left;\n"
+"          }\n"
+"         ")
         self.lineEdit.setObjectName("lineEdit")
         self.horizontalLayout.addWidget(self.lineEdit)
         self.verticalLayout.addLayout(self.horizontalLayout)
+        self.textedit_keyPrompt = VisibleWhitespaceTextEdit(self.centralwidget)
+        self.textedit_keyPrompt.setStyleSheet("\n"
+"        QPlainTextEdit {\n"
+"          background-color: #f9fbff;\n"
+"          border: 1px solid #ccc;\n"
+"          border-radius: 8px;\n"
+"          padding: 8px;\n"
+"          color: #222;\n"
+"          padding: 0.5px;\n"
+"          text-align: left;\n"
+"        }\n"
+"\n"
+"        /* Vertical scrollbar */\n"
+"        QScrollBar:vertical {\n"
+"          border: none;\n"
+"          background: #f0f2f5;\n"
+"          width: 12px;\n"
+"          margin: 2px 0 2px 0;\n"
+"          border-radius: 6px;\n"
+"        }\n"
+"        QScrollBar::handle:vertical {\n"
+"          background: #bbb;\n"
+"          min-height: 20px;\n"
+"          border-radius: 6px;\n"
+"        }\n"
+"        QScrollBar::handle:vertical:hover {\n"
+"          background: #999;\n"
+"        }\n"
+"        QScrollBar::add-line:vertical,\n"
+"        QScrollBar::sub-line:vertical {\n"
+"          border: none;\n"
+"          background: none;\n"
+"          height: 0;\n"
+"        }\n"
+"\n"
+"        /* Horizontal scrollbar */\n"
+"        QScrollBar:horizontal {\n"
+"          border: none;\n"
+"          background: #f0f2f5;\n"
+"          height: 12px;\n"
+"          margin: 0 2px 0 2px;\n"
+"          border-radius: 6px;\n"
+"        }\n"
+"        QScrollBar::handle:horizontal {\n"
+"          background: #bbb;\n"
+"          min-width: 20px;\n"
+"          border-radius: 6px;\n"
+"        }\n"
+"        QScrollBar::handle:horizontal:hover {\n"
+"          background: #999;\n"
+"        }\n"
+"        QScrollBar::add-line:horizontal,\n"
+"        QScrollBar::sub-line:horizontal {\n"
+"          border: none;\n"
+"          background: none;\n"
+"          width: 0;\n"
+"        }\n"
+"      ")
+        self.textedit_keyPrompt.setReadOnly(True)
+        self.textedit_keyPrompt.setObjectName("textedit_keyPrompt")
+        self.verticalLayout.addWidget(self.textedit_keyPrompt)
         self.label_keyPrompt = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_keyPrompt.sizePolicy().hasHeightForWidth())
-        self.label_keyPrompt.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("Cascadia Code")
-        font.setPointSize(22)
-        font.setBold(True)
-        font.setWeight(75)
-        self.label_keyPrompt.setFont(font)
-        self.label_keyPrompt.setStyleSheet("background-color: rgb(223, 255, 255);")
-        self.label_keyPrompt.setScaledContents(False)
+        self.label_keyPrompt.setStyleSheet("\n"
+"        background-color: #f9fbff;\n"
+"        border: 1px solid #ccc;\n"
+"        border-radius: 8px;\n"
+"        padding: 8px;\n"
+"        color: #222;\n"
+"      ")
         self.label_keyPrompt.setAlignment(QtCore.Qt.AlignCenter)
         self.label_keyPrompt.setWordWrap(True)
         self.label_keyPrompt.setObjectName("label_keyPrompt")
         self.verticalLayout.addWidget(self.label_keyPrompt)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 527, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 527, 35))
+        self.menubar.setStyleSheet("\n"
+"        QMenuBar {\n"
+"            background-color: #f4f4f4;\n"
+"            spacing: 6px;\n"
+"            padding: 2px;\n"
+"            color: black; /* normal text color */\n"
+"        }\n"
+"        QMenuBar::item {\n"
+"            spacing: 4px;\n"
+"            padding: 5px 12px;\n"
+"            background: transparent;\n"
+"            font-weight: 500;\n"
+"            color: black; /* force text visible */\n"
+"        }\n"
+"        QMenuBar::item:hover {\n"
+"            background-color: #ddd;\n"
+"            border-radius: 4px;\n"
+"            color: black; /* ensure text visible */\n"
+"        }\n"
+"        QMenuBar::item:pressed {\n"
+"            background-color: #ccc;\n"
+"            border-radius: 4px;\n"
+"            color: black;\n"
+"        }\n"
+"        QMenu {\n"
+"            background-color: #f9f9f9;\n"
+"            border: 1px solid #ccc;\n"
+"            padding: 6px;\n"
+"            color: black; /* menu item text color */\n"
+"        }\n"
+"        QMenu::item:selected {\n"
+"            background-color: #ddd;\n"
+"            border-radius: 4px;\n"
+"            color: black;\n"
+"        }\n"
+"    ")
         self.menubar.setObjectName("menubar")
         self.menuMode = QtWidgets.QMenu(self.menubar)
         self.menuMode.setObjectName("menuMode")
@@ -167,13 +327,20 @@ class Ui_MainWindow(object):
         self.actionAllow_skip_quote = QtWidgets.QAction(MainWindow)
         self.actionAllow_skip_quote.setCheckable(True)
         self.actionAllow_skip_quote.setObjectName("actionAllow_skip_quote")
+        self.actionOnly_description_for_combos = QtWidgets.QAction(MainWindow)
+        self.actionOnly_description_for_combos.setCheckable(True)
+        self.actionOnly_description_for_combos.setObjectName("actionOnly_description_for_combos")
+        self.actionSerif_Font = QtWidgets.QAction(MainWindow)
+        self.actionSerif_Font.setCheckable(True)
+        self.actionSerif_Font.setChecked(True)
+        self.actionSerif_Font.setObjectName("actionSerif_Font")
         self.menuMode.addAction(self.actionKey_Practice)
         self.menuMode.addAction(self.actionTyping_Practice)
         self.menuMode.addAction(self.actionWords_Top_10)
         self.menuMode.addAction(self.actionWords_Top_100)
         self.menuMode.addAction(self.actionWords_Top_1000)
         self.menuMode.addAction(self.actionWords_All)
-        self.menuOptions.addAction(self.actionSplit_file_by_period)
+        self.menuOptions.addAction(self.actionSerif_Font)
         self.menuOptions.addAction(self.actionStart_file_in_random_location)
         self.menuOptions.addAction(self.actionAllow_skip_quote)
         self.menuOptions.addAction(self.actionNumbers)
@@ -192,7 +359,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.actionKey_Practice.toggled['bool'].connect(MainWindow.actionModeKey) # type: ignore
         self.actionTyping_Practice.toggled['bool'].connect(MainWindow.actionModeTyping) # type: ignore
-        self.lineEdit.textChanged['QString'].connect(MainWindow.lineEditTextChanged) # type: ignore
+        self.lineEdit.textChanged.connect(MainWindow.lineEditTextChanged) # type: ignore
         self.actionLoad_typing_content_file.triggered.connect(MainWindow.loadTypingPromptFile) # type: ignore
         self.actionCombos.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
         self.actionFunction.toggled['bool'].connect(MainWindow.keyTypeToggled) # type: ignore
@@ -209,11 +376,17 @@ class Ui_MainWindow(object):
         self.pushButton_Next.clicked.connect(MainWindow.nextButton) # type: ignore
         self.pushButton_Back.clicked.connect(MainWindow.backButton) # type: ignore
         self.actionAllow_skip_quote.toggled['bool'].connect(MainWindow.actionSkipQuote) # type: ignore
+        self.actionSerif_Font.toggled['bool'].connect(MainWindow.actionSerifFont) # type: ignore
+        self.pushButton_Plus.clicked.connect(MainWindow.plusButton) # type: ignore
+        self.pushButton_Minus.clicked.connect(MainWindow.minusButton) # type: ignore
+        self.actionStart_file_in_random_location.toggled['bool'].connect(MainWindow.actionRandomLocation) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Mapping Trainer"))
+        self.pushButton_Minus.setText(_translate("MainWindow", "-"))
+        self.pushButton_Plus.setText(_translate("MainWindow", "+"))
         self.label_keysPerSecond.setText(_translate("MainWindow", "--"))
         self.label_line.setText(_translate("MainWindow", "99999 / 99999"))
         self.pushButton_Back.setText(_translate("MainWindow", "<"))
@@ -240,3 +413,6 @@ class Ui_MainWindow(object):
         self.actionWords_Top_1000.setText(_translate("MainWindow", "Words (Top 1000)"))
         self.actionWords_All.setText(_translate("MainWindow", "Words (All)"))
         self.actionAllow_skip_quote.setText(_translate("MainWindow", "Allow skipping \" in typing mode"))
+        self.actionOnly_description_for_combos.setText(_translate("MainWindow", "Only description for combos"))
+        self.actionSerif_Font.setText(_translate("MainWindow", "Serif Font"))
+from visibleWhitespaceTextEdit import VisibleWhitespaceTextEdit

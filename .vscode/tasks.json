@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "QtDesigner",
+            "type": "shell",
+            "command": "${workspaceFolder}\\qtdesigner.bat",
+            "group": {
+                "kind": "build",
+                "isDefault": true,
+            },
+            "problemMatcher": [],
+        },
+        {
+            "label": "Qt Build UI",
+            "type": "shell",
+            "command": "${workspaceFolder}\\qtuibuild.bat",
+            "group": {
+                "kind": "build",
+                "isDefault": true,
+            },
+            "problemMatcher": [],
+        }
+    ]
+}
