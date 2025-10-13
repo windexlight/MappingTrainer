@@ -13,7 +13,7 @@ import math
 
 import qasync
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent, QObject, QByteArray
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent, QObject, QByteArray, QCoreApplication
 from PyQt5.QtGui import (QColor, QKeyEvent, QIcon, QFontMetricsF, QFont, QTextOption,
                          QTextCursor, QTextCharFormat, QFontDatabase, QSyntaxHighlighter)
 from PyQt5.QtWidgets import (QDialog, QFileDialog, QHeaderView, QInputDialog, QLabel, QApplication, QLineEdit, QPlainTextEdit,
@@ -28,6 +28,7 @@ from words_no_swears import words
 from rawhid import RawHid
 from highlighter import Highlighter
 from detect_code_info import detect_code_info
+from settings import Settings, ModeValue
 
 QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier]
 
@@ -36,51 +37,11 @@ class mainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.config = configparser.ConfigParser(delimiters=('='))
-        self.config.read("settings.ini")
-        if "LINES" not in self.config:
-            self.config["LINES"] = {}
-        if "FONT_SIZES" not in self.config:
-            self.config["FONT_SIZES"] = {}
-        if "KeyPracticeSize" not in self.config["FONT_SIZES"]:
-            self.config["FONT_SIZES"]["KeyPracticeSize"] = str(22)
-        if "TypingSize" not in self.config["FONT_SIZES"]:
-            self.config["FONT_SIZES"]["TypingSize"] = str(12)
-        if "CodeSize" not in self.config["FONT_SIZES"]:
-            self.config["FONT_SIZES"]["CodeSize"] = str(12)
-        if "FLAGS" not in self.config:
-            self.config["FLAGS"] = {}
-        if "SerifFont" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["SerifFont"] = str(True)
-        if "RandomLocation" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["RandomLocation"] = str(False)
-        if "SkipQuote" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["SkipQuote"] = str(False)
-        # if "ComboDescOnly" not in self.config["FLAGS"]:
-        #     self.config["FLAGS"]["ComboDescOnly"] = str(False)
-        if "KeyPractice_Combos" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["KeyPractice_Combos"] = str(True)
-        if "KeyPractice_Function" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["KeyPractice_Function"] = str(True)
-        if "KeyPractice_Lowercase" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["KeyPractice_Lowercase"] = str(True)
-        if "KeyPractice_Modifiers" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["KeyPractice_Modifiers"] = str(True)
-        if "KeyPractice_Numbers" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["KeyPractice_Numbers"] = str(True)
-        if "KeyPractice_Specials" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["KeyPractice_Specials"] = str(True)
-        if "KeyPractice_Symbols" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["KeyPractice_Symbols"] = str(True)
-        if "KeyPractice_Uppercase" not in self.config["FLAGS"]:
-            self.config["FLAGS"]["KeyPractice_Uppercase"] = str(True)
-        if "MODE" not in self.config:
-            self.config["MODE"] = {}
-        if "Mode" not in self.config["MODE"]:
-            self.config["MODE"]["Mode"] = "Key_Practice"
-            self.config["MODE"]["Filename"] = ""
-        if "WINDOWS" not in self.config:
-            self.config["WINDOWS"] = {}
+
+        QCoreApplication.setOrganizationName("windexlight")
+        QCoreApplication.setApplicationName("MappingTrainer")
+
+        self.settings = Settings()
 
         self.modeActionGroup = QActionGroup(self)
         self.modeActionGroup.addAction(self.ui.actionKey_Practice)
@@ -128,7 +89,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.promptLinesIndex = 0
         self.word_count = 0
         self.last_mode = self.ui.actionKey_Practice
-        self.filename = self.config.get("MODE", "Filename") or None
+        self.filename = self.settings.mode.Filename or None
 
         self.rawhid = RawHid()
         self.rawhid.keyEvent.connect(self.rawHidUpdate)
@@ -146,22 +107,22 @@ class mainWindow(QtWidgets.QMainWindow):
         QFontDatabase.addApplicationFont("Lexend-Regular.ttf")
         QFontDatabase.addApplicationFont("FiraCode-Regular.ttf")
 
-        self.serif_font = QFont("Noto Serif", self.config.getint("FONT_SIZES", "TypingSize"))
+        self.serif_font = QFont("Noto Serif", self.settings.font_sizes.TypingSize)
         self.serif_font.setKerning(False)
-        self.sans_font = QFont("Lexend", self.config.getint("FONT_SIZES", "TypingSize"))
+        self.sans_font = QFont("Lexend", self.settings.font_sizes.TypingSize)
         self.sans_font.setKerning(False)
-        self.mono_font = QFont("Fira Code", self.config.getint("FONT_SIZES", "CodeSize"))
+        self.mono_font = QFont("Fira Code", self.settings.font_sizes.CodeSize)
         self.mono_font.setKerning(False)
-        self.key_practice_font = QFont("Fira Code", self.config.getint("FONT_SIZES", "KeyPracticeSize"))
+        self.key_practice_font = QFont("Fira Code", self.settings.font_sizes.KeyPracticeSize)
 
-        self.ui.actionSerif_Font.setChecked(self.config.getboolean("FLAGS", "SerifFont"))
-        self.ui.actionStart_file_in_random_location.setChecked(self.config.getboolean("FLAGS", "RandomLocation"))
-        self.ui.actionAllow_skip_quote.setChecked(self.config.getboolean("FLAGS", "SkipQuote"))
+        self.ui.actionSerif_Font.setChecked(self.settings.flags.SerifFont)
+        self.ui.actionStart_file_in_random_location.setChecked(self.settings.flags.RandomLocation)
+        self.ui.actionAllow_skip_quote.setChecked(self.settings.flags.SkipQuote)
 
         self.typing_font_sizes = [6, 7, 8, 9, 10, 11, 12, 14, 16, 18]
         self.key_practice_font_sizes = [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]
 
-        if self.config.getboolean("FLAGS", "SerifFont"):
+        if self.settings.flags.SerifFont:
             self.text_font = self.serif_font
         else:
             self.text_font = self.sans_font
@@ -171,41 +132,36 @@ class mainWindow(QtWidgets.QMainWindow):
         self.highlighter = Highlighter(self.ui.textedit_keyPrompt.document())
         self.edit_highlighter = Highlighter(self.ui.lineEdit.document(), invert=True)
 
-        mode = self.config.get("MODE", "Mode")
-        if mode == "Key_Practice":
+        mode = self.settings.mode.Mode
+        if mode == ModeValue.Key_Practice:
             self.ui.actionKey_Practice.setChecked(True)
-        elif mode == "Typing_Practice":
+        elif mode == ModeValue.Typing_Practice:
             self.ui.actionTyping_Practice.setChecked(True)
-        elif mode == "Words_Top_10":
+        elif mode == ModeValue.Words_Top_10:
             self.ui.actionWords_Top_10.setChecked(True)
-        elif mode == "Words_Top_100":
+        elif mode == ModeValue.Words_Top_100:
             self.ui.actionWords_Top_100.setChecked(True)
-        elif mode == "Words_Top_1000":
+        elif mode == ModeValue.Words_Top_1000:
             self.ui.actionWords_Top_1000.setChecked(True)
-        elif mode == "Words_All":
+        elif mode == ModeValue.Words_All:
             self.ui.actionWords_All.setChecked(True)
 
         self.initializing_key_flags = True
-        self.ui.actionCombos.setChecked(self.config.getboolean("FLAGS", "KeyPractice_Combos"))
-        self.ui.actionFunction.setChecked(self.config.getboolean("FLAGS", "KeyPractice_Function"))
-        self.ui.actionLowercase.setChecked(self.config.getboolean("FLAGS", "KeyPractice_Lowercase"))
-        self.ui.actionModifiers.setChecked(self.config.getboolean("FLAGS", "KeyPractice_Modifiers"))
-        self.ui.actionNumbers.setChecked(self.config.getboolean("FLAGS", "KeyPractice_Numbers"))
-        self.ui.actionSpecials.setChecked(self.config.getboolean("FLAGS", "KeyPractice_Specials"))
-        self.ui.actionSymbols.setChecked(self.config.getboolean("FLAGS", "KeyPractice_Symbols"))
-        self.ui.actionUppercase.setChecked(self.config.getboolean("FLAGS", "KeyPractice_Uppercase"))
+        self.ui.actionCombos.setChecked(self.settings.flags.KeyPractice_Combos)
+        self.ui.actionFunction.setChecked(self.settings.flags.KeyPractice_Function)
+        self.ui.actionLowercase.setChecked(self.settings.flags.KeyPractice_Lowercase)
+        self.ui.actionModifiers.setChecked(self.settings.flags.KeyPractice_Modifiers)
+        self.ui.actionNumbers.setChecked(self.settings.flags.KeyPractice_Numbers)
+        self.ui.actionSpecials.setChecked(self.settings.flags.KeyPractice_Specials)
+        self.ui.actionSymbols.setChecked(self.settings.flags.KeyPractice_Symbols)
+        self.ui.actionUppercase.setChecked(self.settings.flags.KeyPractice_Uppercase)
         self.initializing_key_flags = False
         self.setKeyTypes()
-        # self.ui.actionOnly_description_for_combos.setChecked(self.config.getboolean("FLAGS", "ComboDescOnly"))
 
-        if "Main" in self.config["WINDOWS"]:
-            self.restoreGeometry(QByteArray.fromBase64(self.config.get("WINDOWS", "Main").encode('ascii')))
+        if not self.settings.windows.Main.isEmpty():
+            self.restoreGeometry(self.settings.windows.Main)
         QTimer.singleShot(0, self.updateNumPromptLines) # run after font and size are initialized
         self.ui.textedit_keyPrompt.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-    def saveConfig(self):
-        with open('settings.ini', 'w') as configfile:
-            self.config.write(configfile)
 
     @qasync.asyncClose
     async def focusOutEvent(self, event):
@@ -224,25 +180,41 @@ class mainWindow(QtWidgets.QMainWindow):
             self.ui.pushButton_Back.setVisible(False)
             self.ui.label_line.setVisible(False)
             self.last_mode = self.ui.actionKey_Practice
-            self.config["MODE"]["Mode"] = "Key_Practice"
-            self.saveConfig()
+            self.settings.mode.Mode = ModeValue.Key_Practice
 
     def actionModeTyping(self, state: bool):
         if state:
             self.rawhid.stop()
+            self.ui.label_keyPrompt.setVisible(False)
+            self.ui.textedit_keyPrompt.setVisible(True)
+            self.ui.lineEdit.setVisible(True)
+            self.ui.label_keysPressed.setVisible(False)
+            self.ui.lineEdit.setFocus()
+            if self.ui.actionKey_Practice.isChecked():
+                self.settings.mode.Mode = ModeValue.Key_Practice
             if self.ui.actionTyping_Practice.isChecked():
+                self.settings.mode.Mode = ModeValue.Typing_Practice
+            if self.ui.actionWords_Top_10.isChecked():
+                self.settings.mode.Mode = ModeValue.Words_Top_10
+            if self.ui.actionWords_Top_100.isChecked():
+                self.settings.mode.Mode = ModeValue.Words_Top_100
+            if self.ui.actionWords_Top_1000.isChecked():
+                self.settings.mode.Mode = ModeValue.Words_Top_1000
+            if self.ui.actionWords_All.isChecked():
+                self.settings.mode.Mode = ModeValue.Words_All
+
+            if self.ui.actionTyping_Practice.isChecked():
+                self.ui.label_line.setVisible(True)
                 if len(self.promptLines) == 0 or self.word_count > 0:
-                    if not self.loadTypingPromptFile(filename=self.filename):
+                    if not self._loadTypingPromptFile(filename=self.filename):
                         self.last_mode.setChecked(True)
                         return
                 else:
                     self.ui.textedit_keyPrompt.setPlainText(self.typingPromptText)
-                self.ui.label_line.setVisible(True)
                 self.word_count = 0
                 self.last_mode = self.ui.actionTyping_Practice
             else:
                 self.ui.label_line.setVisible(False)
-                # self.filename = None
                 _words = [x for x in words if len(x) > 1]
                 if self.ui.actionWords_Top_10.isChecked():
                     self.last_mode = self.ui.actionWords_Top_10
@@ -259,24 +231,6 @@ class mainWindow(QtWidgets.QMainWindow):
                 self.promptLines = _words[:self.word_count]
                 self.initTypingPrompt()
             self.initTypingFont()
-            self.ui.label_keyPrompt.setVisible(False)
-            self.ui.textedit_keyPrompt.setVisible(True)
-            self.ui.lineEdit.setVisible(True)
-            self.ui.label_keysPressed.setVisible(False)
-            self.ui.lineEdit.setFocus()
-            if self.ui.actionKey_Practice.isChecked():
-                self.config["MODE"]["Mode"] = "Key_Practice"
-            if self.ui.actionTyping_Practice.isChecked():
-                self.config["MODE"]["Mode"] = "Typing_Practice"
-            if self.ui.actionWords_Top_10.isChecked():
-                self.config["MODE"]["Mode"] = "Words_Top_10"
-            if self.ui.actionWords_Top_100.isChecked():
-                self.config["MODE"]["Mode"] = "Words_Top_100"
-            if self.ui.actionWords_Top_1000.isChecked():
-                self.config["MODE"]["Mode"] = "Words_Top_1000"
-            if self.ui.actionWords_All.isChecked():
-                self.config["MODE"]["Mode"] = "Words_All"
-            self.saveConfig()
 
     def setTypingFont(self, font):
         self.ui.textedit_keyPrompt.document().setDefaultFont(font)
@@ -302,8 +256,7 @@ class mainWindow(QtWidgets.QMainWindow):
     def setKeyPracticeFontSize(self, size):
         self.key_practice_font.setPointSize(size)
         self.setKeyPracticeFont(self.key_practice_font)
-        self.config["FONT_SIZES"]["KeyPracticeSize"] = str(size)
-        self.saveConfig()
+        self.settings.font_sizes.KeyPracticeSize = size
 
     def typingFontSizeUp(self):
         size = self.ui.lineEdit.font().pointSize()
@@ -331,16 +284,14 @@ class mainWindow(QtWidgets.QMainWindow):
         if not self.code_info["is_code"]:
             self.setTypingFont(self.text_font)
             self.initTypingFont()
-        self.config["FONT_SIZES"]["TypingSize"] = str(size)
-        self.saveConfig()
+        self.settings.font_sizes.TypingSize = size
 
     def setCodeFontSize(self, size):
         self.mono_font.setPointSize(size)
         if self.code_info["is_code"]:
             self.setTypingFont(self.mono_font)
             self.initTypingFont()
-        self.config["FONT_SIZES"]["CodeSize"] = str(size)
-        self.saveConfig()
+        self.settings.font_sizes.CodeSize = size
 
     def plusButton(self):
         if self.ui.actionKey_Practice.isChecked():
@@ -373,7 +324,15 @@ class mainWindow(QtWidgets.QMainWindow):
         line_height = font_metrics.lineSpacing()
         return math.ceil(self.ui.textedit_keyPrompt.height() / line_height)
 
-    def loadTypingPromptFile(self, *, filename=None) -> bool:
+
+    def loadTypingPromptFile(self):
+        need_load = bool(self.filename)
+        if self.settings.mode.Mode != ModeValue.Typing_Practice:
+            self.ui.actionTyping_Practice.setChecked(True)
+        if need_load:
+            self._loadTypingPromptFile()
+
+    def _loadTypingPromptFile(self, *, filename=None) -> bool:
         if not filename:
             inputFile = QFileDialog.getOpenFileName(self,
                 "Open Text File",
@@ -393,20 +352,19 @@ class mainWindow(QtWidgets.QMainWindow):
         self.highlighter.set_lexer(self.code_info["lexer"])
         self.edit_highlighter.set_lexer(self.code_info["lexer"])
         if self.code_info["is_code"]:
-            self.setCodeFontSize(self.config.getint("FONT_SIZES", "CodeSize"))
+            self.setCodeFontSize(self.settings.font_sizes.CodeSize)
             if self.code_info["indent_type"] == "space":
                 self.ui.lineEdit.setIndentWithSpaces(self.code_info["indent_size"])
             else:
                 self.ui.lineEdit.setIndentWithTabs()
         else:
-            self.setTypingFontSize(self.config.getint("FONT_SIZES", "TypingSize"))
+            self.setTypingFontSize(self.settings.font_sizes.TypingSize)
             self.ui.lineEdit.setIndentWithTabs()
         self.promptLines = inputText.split("\n")
         self.filename = filename
         self.sha256 =  hashlib.sha256(inputText.encode("utf-8")).hexdigest()
-        self.initTypingPrompt(line=self.config.getint("LINES", self.filename_key(), fallback=0))
-        self.config["MODE"]["filename"] = filename
-        self.saveConfig()
+        self.initTypingPrompt(line=self.settings.lines[self.filename_key()])
+        self.settings.mode.Filename = filename
         return True
 
     def initTypingPrompt(self, *, line=0):
@@ -432,16 +390,14 @@ class mainWindow(QtWidgets.QMainWindow):
     def actionSkipQuote(self, state: bool):
         if not self.ui.actionKey_Practice.isChecked():
             self.lineEditTextChanged()
-        self.config["FLAGS"]["SkipQuote"] = str(state)
-        self.saveConfig()
+        self.settings.flags.SkipQuote = state
 
     def actionRandomLocation(self, state: bool):
-        self.config["FLAGS"]["RandomLocation"] = str(state)
-        self.saveConfig()
+        self.settings.flags.RandomLocation = state
 
     # def actionComboDescOnly(self, state: bool):
     #     self.updateKeyPromptText()
-    #     self.config["FLAGS"]["ComboDescOnly"] = str(state)
+    #     self.settings.flags.ComboDescOnly = state
     #     self.saveConfig()
 
     def actionSerifFont(self, state: bool):
@@ -449,8 +405,7 @@ class mainWindow(QtWidgets.QMainWindow):
             self.text_font = self.serif_font
         else:
             self.text_font = self.sans_font
-        self.config["FLAGS"]["SerifFont"] = str(state)
-        self.saveConfig()
+        self.settings.flags.SerifFont = state
         if not self.code_info["is_code"]:
             self.setTypingFont(self.text_font)
 
@@ -490,8 +445,7 @@ class mainWindow(QtWidgets.QMainWindow):
             lines = 1
         self.promptLinesIndex = line
         if self.ui.actionTyping_Practice.isChecked() and self.filename is not None:
-            self.config["LINES"][self.filename_key()] = str(line)
-            self.saveConfig()
+            self.settings.lines[self.filename_key()] = line
         self.ui.label_line.setText(F"{line+1} / {len(self.promptLines)}")
         line %= len(self.promptLines)
         self.typingPromptText = '\n'.join(self.promptLines[line : line + lines])
@@ -603,15 +557,14 @@ class mainWindow(QtWidgets.QMainWindow):
         if len(self.keyCombos) == 0:
             self.keyCombos = [scancode.Esc]
         self.generateNewKeyPrompt()
-        self.config["FLAGS"]["KeyPractice_Combos"] = str(self.ui.actionCombos.isChecked())
-        self.config["FLAGS"]["KeyPractice_Function"] = str(self.ui.actionFunction.isChecked())
-        self.config["FLAGS"]["KeyPractice_Lowercase"] = str(self.ui.actionLowercase.isChecked())
-        self.config["FLAGS"]["KeyPractice_Modifiers"] = str(self.ui.actionModifiers.isChecked())
-        self.config["FLAGS"]["KeyPractice_Numbers"] = str(self.ui.actionNumbers.isChecked())
-        self.config["FLAGS"]["KeyPractice_Specials"] = str(self.ui.actionSpecials.isChecked())
-        self.config["FLAGS"]["KeyPractice_Symbols"] = str(self.ui.actionSymbols.isChecked())
-        self.config["FLAGS"]["KeyPractice_Uppercase"] = str(self.ui.actionUppercase.isChecked())
-        self.saveConfig()
+        self.settings.flags.KeyPractice_Combos = self.ui.actionCombos.isChecked()
+        self.settings.flags.KeyPractice_Function = self.ui.actionFunction.isChecked()
+        self.settings.flags.KeyPractice_Lowercase = self.ui.actionLowercase.isChecked()
+        self.settings.flags.KeyPractice_Modifiers = self.ui.actionModifiers.isChecked()
+        self.settings.flags.KeyPractice_Numbers = self.ui.actionNumbers.isChecked()
+        self.settings.flags.KeyPractice_Specials = self.ui.actionSpecials.isChecked()
+        self.settings.flags.KeyPractice_Symbols = self.ui.actionSymbols.isChecked()
+        self.settings.flags.KeyPractice_Uppercase = self.ui.actionUppercase.isChecked()
 
     def eventFilter(self, source, event: QKeyEvent):
         if (t := event.type()) in [QEvent.KeyPress, QEvent.KeyRelease]:
@@ -720,8 +673,7 @@ class mainWindow(QtWidgets.QMainWindow):
         super().resizeEvent(event)
 
     def closeEvent(self, event):
-        self.config["WINDOWS"]["Main"] = self.saveGeometry().toBase64().data().decode('ascii')
-        self.saveConfig()
+        self.settings.windows.Main = self.saveGeometry()
         super().closeEvent(event)
 
     def filename_key(self):
