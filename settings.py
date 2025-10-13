@@ -109,7 +109,24 @@ class Settings:
             key = key.value
         if not isinstance(key, str):
             key = str(key)
-        return self._settings.value(f"{section.value}/{key}", default, type=value_type)
+        raw = self._settings.value(f"{section.value}/{key}", default)
+
+        try:
+            if raw is None:
+                return default
+
+            if value_type is bool:
+                return str(raw).lower() in ("1", "true", "yes", "on")
+            elif value_type in (int, float, str):
+                return value_type(raw)
+            elif value_type is QByteArray:
+                if isinstance(raw, QByteArray):
+                    return raw
+                return QByteArray()
+            else:
+                return raw
+        except:
+            return default
 
     def set(self, section: Section, key: Any, value: Any) -> None:
         if isinstance(key, Enum):
@@ -295,11 +312,9 @@ class _WindowsSection:
 
     @property
     def Main(self) -> QByteArray:
-        """Return saved geometry/state of the main window. Empty QByteArray if not set."""
         value = self._p.get(self._section, "Main", default=QByteArray(), value_type=QByteArray)
         return value
 
     @Main.setter
     def Main(self, geometry: QByteArray):
-        """Store geometry/state for the main window."""
         self._p.set(self._section, "Main", geometry)

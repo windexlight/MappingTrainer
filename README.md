@@ -22,6 +22,7 @@ https://github.com/libusb/hidapi/releases/latest
 ## TODO
 
 - Keep working on state persistence
+    - Save window geometry separately for typing, word, and key modes
     - Make options for advancing on enter/space or not
     - Keep testing
 - Allow selection between indentation styles in case auto-detection doesn't work

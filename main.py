@@ -15,7 +15,7 @@ import qasync
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent, QObject, QByteArray, QCoreApplication
 from PyQt5.QtGui import (QColor, QKeyEvent, QIcon, QFontMetricsF, QFont, QTextOption,
-                         QTextCursor, QTextCharFormat, QFontDatabase, QSyntaxHighlighter)
+                         QTextCursor, QTextCharFormat, QFontDatabase, QSyntaxHighlighter, QGuiApplication)
 from PyQt5.QtWidgets import (QDialog, QFileDialog, QHeaderView, QInputDialog, QLabel, QApplication, QLineEdit, QPlainTextEdit,
                              QLabel, QMessageBox, QTableWidgetItem, QAbstractButton, QCheckBox, QActionGroup)
 
@@ -107,6 +107,14 @@ class mainWindow(QtWidgets.QMainWindow):
         QFontDatabase.addApplicationFont("Lexend-Regular.ttf")
         QFontDatabase.addApplicationFont("FiraCode-Regular.ttf")
 
+        self.typing_font_sizes = [6, 7, 8, 9, 10, 11, 12, 14, 16, 18]
+        self.key_practice_font_sizes = [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]
+        def closest(target, values):
+            return min(values, key=lambda x: abs(x - target))
+        self.settings.font_sizes.TypingSize = closest(self.settings.font_sizes.TypingSize, self.typing_font_sizes)
+        self.settings.font_sizes.CodeSize = closest(self.settings.font_sizes.CodeSize, self.typing_font_sizes)
+        self.settings.font_sizes.KeyPracticeSize = closest(self.settings.font_sizes.KeyPracticeSize, self.key_practice_font_sizes)
+
         self.serif_font = QFont("Noto Serif", self.settings.font_sizes.TypingSize)
         self.serif_font.setKerning(False)
         self.sans_font = QFont("Lexend", self.settings.font_sizes.TypingSize)
@@ -119,9 +127,6 @@ class mainWindow(QtWidgets.QMainWindow):
         self.ui.actionStart_file_in_random_location.setChecked(self.settings.flags.RandomLocation)
         self.ui.actionAllow_skip_quote.setChecked(self.settings.flags.SkipQuote)
 
-        self.typing_font_sizes = [6, 7, 8, 9, 10, 11, 12, 14, 16, 18]
-        self.key_practice_font_sizes = [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]
-
         if self.settings.flags.SerifFont:
             self.text_font = self.serif_font
         else:
@@ -131,6 +136,18 @@ class mainWindow(QtWidgets.QMainWindow):
 
         self.highlighter = Highlighter(self.ui.textedit_keyPrompt.document())
         self.edit_highlighter = Highlighter(self.ui.lineEdit.document(), invert=True)
+
+        self.initializing_key_flags = True
+        self.ui.actionCombos.setChecked(self.settings.flags.KeyPractice_Combos)
+        self.ui.actionFunction.setChecked(self.settings.flags.KeyPractice_Function)
+        self.ui.actionLowercase.setChecked(self.settings.flags.KeyPractice_Lowercase)
+        self.ui.actionModifiers.setChecked(self.settings.flags.KeyPractice_Modifiers)
+        self.ui.actionNumbers.setChecked(self.settings.flags.KeyPractice_Numbers)
+        self.ui.actionSpecials.setChecked(self.settings.flags.KeyPractice_Specials)
+        self.ui.actionSymbols.setChecked(self.settings.flags.KeyPractice_Symbols)
+        self.ui.actionUppercase.setChecked(self.settings.flags.KeyPractice_Uppercase)
+        self.initializing_key_flags = False
+        self.setKeyTypes()
 
         mode = self.settings.mode.Mode
         if mode == ModeValue.Key_Practice:
@@ -146,20 +163,15 @@ class mainWindow(QtWidgets.QMainWindow):
         elif mode == ModeValue.Words_All:
             self.ui.actionWords_All.setChecked(True)
 
-        self.initializing_key_flags = True
-        self.ui.actionCombos.setChecked(self.settings.flags.KeyPractice_Combos)
-        self.ui.actionFunction.setChecked(self.settings.flags.KeyPractice_Function)
-        self.ui.actionLowercase.setChecked(self.settings.flags.KeyPractice_Lowercase)
-        self.ui.actionModifiers.setChecked(self.settings.flags.KeyPractice_Modifiers)
-        self.ui.actionNumbers.setChecked(self.settings.flags.KeyPractice_Numbers)
-        self.ui.actionSpecials.setChecked(self.settings.flags.KeyPractice_Specials)
-        self.ui.actionSymbols.setChecked(self.settings.flags.KeyPractice_Symbols)
-        self.ui.actionUppercase.setChecked(self.settings.flags.KeyPractice_Uppercase)
-        self.initializing_key_flags = False
-        self.setKeyTypes()
+        geom = self.settings.windows.Main
+        if geom and isinstance(geom, QByteArray):
+            self.restoreGeometry(geom)
+        rect = self.frameGeometry()
+        screen = QGuiApplication.primaryScreen().availableGeometry()
+        if not screen.intersects(rect):
+            self.move(screen.center() - self.rect().center())
 
-        if not self.settings.windows.Main.isEmpty():
-            self.restoreGeometry(self.settings.windows.Main)
+
         if mode == ModeValue.Typing_Practice:
             QTimer.singleShot(0, self.updateNumPromptLines) # run after font and size are initialized
         self.ui.textedit_keyPrompt.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -207,7 +219,13 @@ class mainWindow(QtWidgets.QMainWindow):
             if self.ui.actionTyping_Practice.isChecked():
                 self.ui.label_line.setVisible(True)
                 if len(self.promptLines) == 0 or self.word_count > 0:
-                    if not self._loadTypingPromptFile(filename=self.filename):
+                    revert_mode = True
+                    if self._loadTypingPromptFile(filename=self.filename):
+                        revert_mode = False
+                    elif self.filename is not None:
+                        if self._loadTypingPromptFile():
+                            revert_mode = False
+                    if revert_mode:
                         self.last_mode.setChecked(True)
                         return
                 else:
