@@ -160,7 +160,8 @@ class mainWindow(QtWidgets.QMainWindow):
 
         if not self.settings.windows.Main.isEmpty():
             self.restoreGeometry(self.settings.windows.Main)
-        QTimer.singleShot(0, self.updateNumPromptLines) # run after font and size are initialized
+        if mode == ModeValue.Typing_Practice:
+            QTimer.singleShot(0, self.updateNumPromptLines) # run after font and size are initialized
         self.ui.textedit_keyPrompt.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     @qasync.asyncClose

@@ -21,7 +21,6 @@ https://github.com/libusb/hidapi/releases/latest
 
 ## TODO
 
-- When restoring to word practice mode on startup, it loads too many lines
 - Keep working on state persistence
     - Make options for advancing on enter/space or not
     - Keep testing
