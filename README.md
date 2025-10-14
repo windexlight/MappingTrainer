@@ -37,5 +37,6 @@ https://github.com/libusb/hidapi/releases/latest
 - Ebook formats?
 - Dark mode
 - Make forward/back and font up/down buttons prettier
-- Update code_info from a dictionary to a bespoke object
-
+- Graphic representation of keys in key mode
+- Add line numbers for code files
+- Add tab style and size to status bar for code

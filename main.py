@@ -27,7 +27,7 @@ import combos
 from words_no_swears import words
 from rawhid import RawHid
 from highlighter import Highlighter
-from detect_code_info import detect_code_info
+from detect_code_info import detect_code_info, CodeInfo, IndentType
 from settings import Settings, ModeValue
 
 QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier]
@@ -62,7 +62,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.changing_line_edit_text = False
         self.processing_line_edit_enter_pressed = False
         self.match = False
-        self.code_info = {"is_code": False, "language": None, "indent_type": None, "indent_size": None}
+        self.code_info = CodeInfo()
         self.last_indent = ""
 
 
@@ -300,14 +300,14 @@ class mainWindow(QtWidgets.QMainWindow):
     def setTypingFontSize(self, size):
         self.serif_font.setPointSize(size)
         self.sans_font.setPointSize(size)
-        if not self.code_info["is_code"]:
+        if not self.code_info.is_code:
             self.setTypingFont(self.text_font)
             self.initTypingFont()
         self.settings.font_sizes.TypingSize = size
 
     def setCodeFontSize(self, size):
         self.mono_font.setPointSize(size)
-        if self.code_info["is_code"]:
+        if self.code_info.is_code:
             self.setTypingFont(self.mono_font)
             self.initTypingFont()
         self.settings.font_sizes.CodeSize = size
@@ -316,7 +316,7 @@ class mainWindow(QtWidgets.QMainWindow):
         if self.ui.actionKey_Practice.isChecked():
             self.keyPracticeFontSizeUp()
         else:
-            if self.code_info["is_code"]:
+            if self.code_info.is_code:
                 self.codeFontSizeUp()
             else:
                 self.typingFontSizeUp()
@@ -325,7 +325,7 @@ class mainWindow(QtWidgets.QMainWindow):
         if self.ui.actionKey_Practice.isChecked():
             self.keyPracticeFontSizeDown()
         else:
-            if self.code_info["is_code"]:
+            if self.code_info.is_code:
                 self.codeFontSizeDown()
             else:
                 self.typingFontSizeDown()
@@ -368,12 +368,12 @@ class mainWindow(QtWidgets.QMainWindow):
         except:
             return False
         self.code_info = detect_code_info(filename, inputText)
-        self.highlighter.set_lexer(self.code_info["lexer"])
-        self.edit_highlighter.set_lexer(self.code_info["lexer"])
-        if self.code_info["is_code"]:
+        self.highlighter.set_lexer(self.code_info.lexer)
+        self.edit_highlighter.set_lexer(self.code_info.lexer)
+        if self.code_info.is_code:
             self.setCodeFontSize(self.settings.font_sizes.CodeSize)
-            if self.code_info["indent_type"] == "space":
-                self.ui.lineEdit.setIndentWithSpaces(self.code_info["indent_size"])
+            if self.code_info.indent_type == IndentType.space:
+                self.ui.lineEdit.setIndentWithSpaces(self.code_info.indent_size)
             else:
                 self.ui.lineEdit.setIndentWithTabs()
         else:
@@ -425,7 +425,7 @@ class mainWindow(QtWidgets.QMainWindow):
         else:
             self.text_font = self.sans_font
         self.settings.flags.SerifFont = state
-        if not self.code_info["is_code"]:
+        if not self.code_info.is_code:
             self.setTypingFont(self.text_font)
 
     def nextTypingPromptLine(self, *, doTime=True):
@@ -476,7 +476,7 @@ class mainWindow(QtWidgets.QMainWindow):
             self.ui.lineEdit.clear()
         else:
             self.lineEditTextChanged()
-        if self.code_info["is_code"] and len(self.promptLines[line]) >= len(self.last_indent):
+        if self.code_info.is_code and len(self.promptLines[line]) >= len(self.last_indent):
             self.ui.lineEdit.textCursor().insertText(self.last_indent)
         else:
             self.last_indent = ""
@@ -505,7 +505,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 if c == typed[typed_idx]:
                     typed_idx = typed_idx+1
                     continue
-                if not self.code_info["is_code"]:
+                if not self.code_info.is_code:
                     if (c == ' ' or c == '\t'):
                         if typed_idx > 0 and typed[typed_idx-1] == ' ':
                             continue
@@ -538,10 +538,7 @@ class mainWindow(QtWidgets.QMainWindow):
             return
         self.processing_line_edit_enter_pressed = True
         if self.match:
-            # self.ui.lineEdit.setStyleSheet(self.greenLineEditStyle)
-            # await asyncio.sleep(0.2)
-            # self.ui.lineEdit.setStyleSheet(self.baseLineEditStyle)
-            if self.code_info["is_code"]:
+            if self.code_info.is_code:
                 m = re.match(r'^[ \t]+', self.ui.lineEdit.toPlainText())
                 self.last_indent = m.group(0) if m else ""
             self.nextTypingPromptLine()
@@ -665,11 +662,6 @@ class mainWindow(QtWidgets.QMainWindow):
         if self.ui.actionOnly_description_for_combos.isChecked():
             self.ui.label_keyPrompt.setText(self.keyPromptDesc())
         else:
-            # if (desc := self.keyPromptDesc()) is not None:
-            #     desc = F"<span style='font-size:10pt;'>{self.keyPromptDesc()}</span><br/>"
-            # else:
-            #     desc = ""
-            # self.ui.label_keyPrompt.setText(F"{desc}{self.makeKeyString(self.keyPromptKeys())}")
             self.ui.label_keyPrompt.setText(self.makeKeyString(self.keyPromptKeys()))
 
     def generateNewKeyPrompt(self, *, doTime=True):
@@ -706,30 +698,6 @@ class AltBlocker(QObject):
         if e.type() == QEvent.KeyPress and e.key() == Qt.Key_Alt:
             return True
         return super().eventFilter(obj, e)
-
-# class TypedTextMatchingHighlighter(QSyntaxHighlighter):
-#     def __init__(self, document, *, invert=False):
-#         super().__init__(document)
-#         self.n = 0
-#         self.invert = invert
-#         self.format = QTextCharFormat()
-#         if invert:
-#             self.format.setForeground(QColor(170, 0, 0))
-#         else:
-#             self.format.setForeground(QColor(0, 170, 0))
-
-#     def setHighlightLen(self, n: int):
-#         self.n = n
-
-#     def highlightBlock(self, text):
-#         if self.currentBlock().blockNumber() == 0:  # first line
-#             if self.invert:
-#                 if self.n < len(text) and len(text) > 0:
-#                     self.setFormat(self.n, len(text)-self.n, self.format)
-#             else:
-#                 if self.n > 0 and len(text) > 0:
-#                     length = min(self.n, len(text))
-#                     self.setFormat(0, length, self.format)
 
 
 if __name__ == "__main__":
