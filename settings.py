@@ -1,40 +1,26 @@
-import os
-from enum import Enum
-from typing import Any, Optional, Type, TypeVar
-from pathlib import Path
 from PyQt5.QtCore import QSettings, QStandardPaths, QByteArray
+from enum import Enum
+from pathlib import Path
+from typing import Any, Type, Protocol
+from dataclasses import dataclass, fields
+import re
+import hashlib
+from pygments.lexers import get_lexer_by_name
+import detect_code_info
 
-T = TypeVar("T")
+class Section:
+    _settings: QSettings = None
+    _section_name: str = None
+    _loaded = False
+    def __setattr__(self, name, value):
+        super().__setattr__(name, value)
+        if not self._loaded or not self._settings or not self._section_name or name.startswith("_"):
+            return
+        key = f"{self._section_name}/{name}"
+        if isinstance(value, Enum):
+            value = value.name
+        self._settings.setValue(key, value)
 
-
-class Section(Enum):
-    LINES = "LINES"
-    FONT_SIZES = "FONT_SIZES"
-    FLAGS = "FLAGS"
-    MODE = "MODE"
-    WINDOWS = "WINDOWS"
-
-class FontSizesKey(Enum):
-    KeyPracticeSize = "KeyPracticeSize"
-    TypingSize = "TypingSize"
-    CodeSize = "CodeSize"
-
-class FlagsKey(Enum):
-    SerifFont = "SerifFont"
-    RandomLocation = "RandomLocation"
-    SkipQuote = "SkipQuote"
-    KeyPractice_Combos = "KeyPractice_Combos"
-    KeyPractice_Function = "KeyPractice_Function"
-    KeyPractice_Lowercase = "KeyPractice_Lowercase"
-    KeyPractice_Modifiers = "KeyPractice_Modifiers"
-    KeyPractice_Numbers = "KeyPractice_Numbers"
-    KeyPractice_Specials = "KeyPractice_Specials"
-    KeyPractice_Symbols = "KeyPractice_Symbols"
-    KeyPractice_Uppercase = "KeyPractice_Uppercase"
-
-class ModeKey(Enum):
-    Mode = "Mode"
-    Filename = "Filename"
 
 class ModeValue(Enum):
     Key_Practice = "Key_Practice"
@@ -44,277 +30,190 @@ class ModeValue(Enum):
     Words_Top_1000 = "Words_Top_1000"
     Words_All = "Words_All"
 
-DEFAULTS = {
-    Section.FONT_SIZES: {
-        FontSizesKey.KeyPracticeSize: 22,
-        FontSizesKey.TypingSize: 12,
-        FontSizesKey.CodeSize: 12,
-    },
-    Section.FLAGS: {
-        FlagsKey.SerifFont: True,
-        FlagsKey.RandomLocation: False,
-        FlagsKey.SkipQuote: False,
-        FlagsKey.KeyPractice_Combos: True,
-        FlagsKey.KeyPractice_Function: True,
-        FlagsKey.KeyPractice_Lowercase: True,
-        FlagsKey.KeyPractice_Modifiers: True,
-        FlagsKey.KeyPractice_Numbers: True,
-        FlagsKey.KeyPractice_Specials: True,
-        FlagsKey.KeyPractice_Symbols: True,
-        FlagsKey.KeyPractice_Uppercase: True,
-    },
-    Section.MODE: {
-        ModeKey.Mode: ModeValue.Key_Practice.value,
-        ModeKey.Filename: "",
-    },
-}
+class ModeSettings(Protocol):
+    WindowGeometry: QByteArray
+    FontSize: int
+    SerifFont: bool
+    RandomLocation: bool
+    SkipQuote: bool
+    AdvanceOnEnter: bool
+    AdvanceOnSpace: bool
+
+class WindowGeometrySettings(Protocol):
+    WindowGeometry: QByteArray
+
+@dataclass
+class prose(Section):
+    WindowGeometry: QByteArray = QByteArray()
+    FontSize = 14
+    SerifFont: bool = True
+    RandomLocation: bool = False
+    SkipQuote: bool = False
+    AdvanceOnEnter: bool = True
+    AdvanceOnSpace: bool = True
+
+@dataclass
+class code(Section):
+    WindowGeometry: QByteArray = QByteArray()
+    FontSize = 12
+    SerifFont: bool = False
+    RandomLocation: bool = False
+    SkipQuote: bool = False
+    AdvanceOnEnter: bool = True
+    AdvanceOnSpace: bool = False
+
+@dataclass
+class words(Section):
+    WindowGeometry: QByteArray = QByteArray()
+    FontSize = 18
+    SerifFont: bool = True
+    RandomLocation: bool = True
+    SkipQuote: bool = False
+    AdvanceOnEnter: bool = False
+    AdvanceOnSpace: bool = False
+
+@dataclass
+class key_practice(Section):
+    WindowGeometry: QByteArray = QByteArray()
+    FontSize: int = 22
+    Combos: bool = True
+    Function: bool = True
+    Lowercase: bool = True
+    Modifiers: bool = True
+    Numbers: bool = True
+    Specials: bool = True
+    Symbols: bool = True
+    Uppercase: bool = True
+
+@dataclass
+class file(Section):
+    Mode: ModeValue = ModeValue.Key_Practice
+    Filename: str = None
+    Sha256: str = None
+
+@dataclass
+class FileSettings(Section):
+    Line: int = 0
+    IsCode: bool = False
+    CodeLanguage: str = None
+    IndentType: detect_code_info.IndentType = None
+    IndentSize: int = None
 
 
 class Settings:
     def __init__(self):
         config_dir = Path(QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation))
-        config_dir = config_dir
         config_dir.mkdir(parents=True, exist_ok=True)
         self._path = config_dir / "settings.ini"
-
         self._settings = QSettings(str(self._path), QSettings.IniFormat)
         self._settings.setFallbacksEnabled(False)
 
-        self._ensure_defaults()
+        # self.font_sizes = self._load(font_sizes)
+        self.prose = self._load(prose)
+        self.code = self._load(code)
+        self.words = self._load(words)
+        self.file = self._load(file)
+        self.key_practice = self._load(key_practice)
+        # self.windows = self._load(windows)
 
-        self.font_sizes = _FontSizesSection(self)
-        self.flags = _FlagsSection(self)
-        self.mode = _ModeSection(self)
-        self.lines = _LinesSection(self)
-        self.windows = _WindowsSection(self)
+        self._file_settings = {}
+        for section in self._settings.childGroups():
+            if re.fullmatch(r'.+_[a-f0-9]{64}', section):
+                self._file_settings[section] = self._load(FileSettings, section)
 
-    def _ensure_defaults(self) -> None:
-        for section, keys in DEFAULTS.items():
-            for key, value in keys.items():
-                path = f"{section.value}/{key.value}"
-                if self._settings.value(path, None) is None:
-                    self._settings.setValue(path, value)
-
-    def get(
-        self,
-        section: Section,
-        key: Any,
-        *,
-        value_type: Type[T],
-        default: Optional[Any] = None,
-    ) -> T:
-        if default is None:
-            default = DEFAULTS.get(section, {}).get(key)
-        if isinstance(key, Enum):
-            key = key.value
-        if not isinstance(key, str):
-            key = str(key)
-        raw = self._settings.value(f"{section.value}/{key}", default)
-
+    @property
+    def file_settings(self) -> FileSettings:
+        if not self.file.Filename:
+            return FileSettings()
+        if (key := f"{Path(self.file.Filename).name}_{str.lower(self.file.Sha256)}") not in self._file_settings:
+            fs = FileSettings()
+            fs._settings = self._settings
+            fs._section_name = key
+            fs._loaded = True
+            self._file_settings[key] = fs
+        return self._file_settings[key]
+    
+    def have_file(self, path: str, sha256: str) -> str:
+        return f"{Path(path).name}_{str.lower(sha256)}" in self._file_settings
+    
+    @property
+    def code_info(self) -> detect_code_info.CodeInfo:
+        ret = detect_code_info.CodeInfo()
+        fs = self.file_settings
         try:
-            if raw is None:
-                return default
+            lexer = get_lexer_by_name(fs.CodeLanguage)
+        except:
+            return ret
+        ret.is_code = fs.IsCode
+        ret.language = fs.CodeLanguage or None
+        ret.indent_type = fs.IndentType or None
+        ret.indent_size = fs.IndentSize or None
+        ret.lexer = lexer
+        return ret
+    
+    def set_code_info(self, code_info: detect_code_info.CodeInfo):
+        fs = self.file_settings
+        fs.IsCode = code_info.is_code
+        fs.CodeLanguage = code_info.language if code_info.language is not None else ""
+        fs.IndentType = code_info.indent_type if code_info.indent_type is not None else ""
+        fs.IndentSize = code_info.indent_size if code_info.indent_size is not None else ""
 
-            if value_type is bool:
-                return str(raw).lower() in ("1", "true", "yes", "on")
-            elif value_type in (int, float, str):
-                return value_type(raw)
-            elif value_type is QByteArray:
-                if isinstance(raw, QByteArray):
+    @property
+    def mode_settings(self) -> ModeSettings:
+        if self.file.Mode in (ModeValue.Typing_Practice, ModeValue.Key_Practice):
+            if self.file_settings.IsCode:
+                return self.code
+            else:
+                return self.prose
+        else:
+            return self.words
+        
+    @property
+    def window_geometry(self) -> WindowGeometrySettings:
+        if self.file.Mode == ModeValue.Key_Practice:
+            return self.key_practice
+        elif self.file.Mode == ModeValue.Typing_Practice:
+            if self.file_settings.IsCode:
+                return self.code
+            else:
+                return self.prose
+        else:
+            return self.words
+
+    def _load(self, cls, section_name = None):
+        if not section_name:
+            section_name = str.upper(cls.__name__)
+        obj = cls()
+        obj._settings = self._settings
+        obj._section_name = section_name
+        for f in fields(cls):
+            key = f"{section_name}/{f.name}"
+            if (raw := self._settings.value(key, None)) is not None:
+                try:
+                    value = self._convert_value(raw, f.type, getattr(obj, f.name))
+                    setattr(obj, f.name, value)
+                    continue
+                except:
+                    pass
+            if isinstance(value := getattr(obj, f.name), Enum):
+                value = value.value
+            self._settings.setValue(key, value)
+        obj._loaded = True
+        return obj
+
+    def _convert_value(self, raw, typ, default):
+        try:
+            if raw == "":
+                return None
+            elif issubclass(typ, Enum):
+                return typ[raw]
+            elif typ is QByteArray:
+                if isinstance(raw, QByteArray) and len(raw) < 1024:
                     return raw
                 return QByteArray()
+            elif typ is bool:
+                return str(raw).lower() in ("1", "true", "yes", "on")
             else:
-                return raw
-        except:
+                return typ(raw)
+        except Exception:
             return default
-
-    def set(self, section: Section, key: Any, value: Any) -> None:
-        if isinstance(key, Enum):
-            key = key.value
-        if not isinstance(key, str):
-            key = str(key)
-        self._settings.setValue(f"{section.value}/{key}", value)
-
-    def reset_to_defaults(self) -> None:
-        self._settings.clear()
-        self._ensure_defaults()
-
-    def path(self) -> str:
-        return str(self._path)
-
-
-class _FontSizesSection:
-    def __init__(self, parent: Settings):
-        self._p = parent
-
-    @property
-    def KeyPracticeSize(self) -> int:
-        return self._p.get(Section.FONT_SIZES, FontSizesKey.KeyPracticeSize, value_type=int)
-
-    @KeyPracticeSize.setter
-    def KeyPracticeSize(self, v: int):
-        self._p.set(Section.FONT_SIZES, FontSizesKey.KeyPracticeSize, v)
-
-    @property
-    def TypingSize(self) -> int:
-        return self._p.get(Section.FONT_SIZES, FontSizesKey.TypingSize, value_type=int)
-
-    @TypingSize.setter
-    def TypingSize(self, v: int):
-        self._p.set(Section.FONT_SIZES, FontSizesKey.TypingSize, v)
-
-    @property
-    def CodeSize(self) -> int:
-        return self._p.get(Section.FONT_SIZES, FontSizesKey.CodeSize, value_type=int)
-
-    @CodeSize.setter
-    def CodeSize(self, v: int):
-        self._p.set(Section.FONT_SIZES, FontSizesKey.CodeSize, v)
-
-
-class _FlagsSection:
-    def __init__(self, parent: Settings):
-        self._p = parent
-        self._section = Section.FLAGS
-
-    @property
-    def SerifFont(self) -> bool:
-        return self._p.get(self._section, FlagsKey.SerifFont, value_type=bool)
-
-    @SerifFont.setter
-    def SerifFont(self, value: bool):
-        self._p.set(self._section, FlagsKey.SerifFont, value)
-
-    @property
-    def RandomLocation(self) -> bool:
-        return self._p.get(self._section, FlagsKey.RandomLocation, value_type=bool)
-
-    @RandomLocation.setter
-    def RandomLocation(self, value: bool):
-        self._p.set(self._section, FlagsKey.RandomLocation, value)
-
-    @property
-    def SkipQuote(self) -> bool:
-        return self._p.get(self._section, FlagsKey.SkipQuote, value_type=bool)
-
-    @SkipQuote.setter
-    def SkipQuote(self, value: bool):
-        self._p.set(self._section, FlagsKey.SkipQuote, value)
-
-    @property
-    def KeyPractice_Combos(self) -> bool:
-        return self._p.get(self._section, FlagsKey.KeyPractice_Combos, value_type=bool)
-
-    @KeyPractice_Combos.setter
-    def KeyPractice_Combos(self, value: bool):
-        self._p.set(self._section, FlagsKey.KeyPractice_Combos, value)
-
-    @property
-    def KeyPractice_Function(self) -> bool:
-        return self._p.get(self._section, FlagsKey.KeyPractice_Function, value_type=bool)
-
-    @KeyPractice_Function.setter
-    def KeyPractice_Function(self, value: bool):
-        self._p.set(self._section, FlagsKey.KeyPractice_Function, value)
-
-    @property
-    def KeyPractice_Lowercase(self) -> bool:
-        return self._p.get(self._section, FlagsKey.KeyPractice_Lowercase, value_type=bool)
-
-    @KeyPractice_Lowercase.setter
-    def KeyPractice_Lowercase(self, value: bool):
-        self._p.set(self._section, FlagsKey.KeyPractice_Lowercase, value)
-
-    @property
-    def KeyPractice_Modifiers(self) -> bool:
-        return self._p.get(self._section, FlagsKey.KeyPractice_Modifiers, value_type=bool)
-
-    @KeyPractice_Modifiers.setter
-    def KeyPractice_Modifiers(self, value: bool):
-        self._p.set(self._section, FlagsKey.KeyPractice_Modifiers, value)
-
-    @property
-    def KeyPractice_Numbers(self) -> bool:
-        return self._p.get(self._section, FlagsKey.KeyPractice_Numbers, value_type=bool)
-
-    @KeyPractice_Numbers.setter
-    def KeyPractice_Numbers(self, value: bool):
-        self._p.set(self._section, FlagsKey.KeyPractice_Numbers, value)
-
-    @property
-    def KeyPractice_Specials(self) -> bool:
-        return self._p.get(self._section, FlagsKey.KeyPractice_Specials, value_type=bool)
-
-    @KeyPractice_Specials.setter
-    def KeyPractice_Specials(self, value: bool):
-        self._p.set(self._section, FlagsKey.KeyPractice_Specials, value)
-
-    @property
-    def KeyPractice_Symbols(self) -> bool:
-        return self._p.get(self._section, FlagsKey.KeyPractice_Symbols, value_type=bool)
-
-    @KeyPractice_Symbols.setter
-    def KeyPractice_Symbols(self, value: bool):
-        self._p.set(self._section, FlagsKey.KeyPractice_Symbols, value)
-
-    @property
-    def KeyPractice_Uppercase(self) -> bool:
-        return self._p.get(self._section, FlagsKey.KeyPractice_Uppercase, value_type=bool)
-
-    @KeyPractice_Uppercase.setter
-    def KeyPractice_Uppercase(self, value: bool):
-        self._p.set(self._section, FlagsKey.KeyPractice_Uppercase, value)
-
-
-class _ModeSection:
-    def __init__(self, parent: Settings):
-        self._p = parent
-        self._section = Section.MODE
-
-    @property
-    def Mode(self) -> ModeValue:
-        default = DEFAULTS[Section.MODE][ModeKey.Mode]
-        value_str = self._p.get(self._section, ModeKey.Mode, default=default, value_type=str)
-        try:
-            return ModeValue(value_str)
-        except:
-            return ModeValue(default)
-
-    @Mode.setter
-    def Mode(self, value: ModeValue):
-        self._p.set(self._section, ModeKey.Mode, value.value)
-
-    @property
-    def Filename(self) -> str:
-        return self._p.get(Section.MODE, ModeKey.Filename, value_type=str)
-
-    @Filename.setter
-    def Filename(self, v: str):
-        self._p.set(Section.MODE, ModeKey.Filename, v)
-
-
-class _LinesSection:
-    def __init__(self, parent: Settings):
-        self._p = parent
-        self._section = Section.LINES
-
-    def __getitem__(self, key: str) -> int:
-        return self._p.get(self._section, key, default=0, value_type=int)
-
-    def __setitem__(self, key: str, value: int) -> None:
-        self._p.set(self._section, key, value)
-
-
-class _WindowsSection:
-    def __init__(self, parent: Settings):
-        self._p = parent
-        self._section = Section.WINDOWS
-
-    @property
-    def Main(self) -> QByteArray:
-        value = self._p.get(self._section, "Main", default=QByteArray(), value_type=QByteArray)
-        return value
-
-    @Main.setter
-    def Main(self, geometry: QByteArray):
-        self._p.set(self._section, "Main", geometry)

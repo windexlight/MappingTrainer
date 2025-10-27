@@ -579,14 +579,6 @@
     <string>Allow skipping &quot; in typing mode</string>
    </property>
   </action>
-  <action name="actionOnly_description_for_combos">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Only description for combos</string>
-   </property>
-  </action>
   <action name="actionSerif_Font">
    <property name="checkable">
     <bool>true</bool>

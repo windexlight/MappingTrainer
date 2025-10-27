@@ -3,10 +3,10 @@ from pygments.token import Token
 from pygments import lex
 
 class Highlighter(QSyntaxHighlighter):
-    def __init__(self, document, *, invert=False):
+    def __init__(self, document, *, invert=False, lexer=None):
         super().__init__(document)
         self.n = 0
-        self.lexer = None
+        self.lexer = lexer
         self.invert = invert
         self.format = QTextCharFormat()
         if invert:

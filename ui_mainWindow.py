@@ -327,9 +327,6 @@ class Ui_MainWindow(object):
         self.actionAllow_skip_quote = QtWidgets.QAction(MainWindow)
         self.actionAllow_skip_quote.setCheckable(True)
         self.actionAllow_skip_quote.setObjectName("actionAllow_skip_quote")
-        self.actionOnly_description_for_combos = QtWidgets.QAction(MainWindow)
-        self.actionOnly_description_for_combos.setCheckable(True)
-        self.actionOnly_description_for_combos.setObjectName("actionOnly_description_for_combos")
         self.actionSerif_Font = QtWidgets.QAction(MainWindow)
         self.actionSerif_Font.setCheckable(True)
         self.actionSerif_Font.setChecked(True)
@@ -413,6 +410,5 @@ class Ui_MainWindow(object):
         self.actionWords_Top_1000.setText(_translate("MainWindow", "Words (Top 1000)"))
         self.actionWords_All.setText(_translate("MainWindow", "Words (All)"))
         self.actionAllow_skip_quote.setText(_translate("MainWindow", "Allow skipping \" in typing mode"))
-        self.actionOnly_description_for_combos.setText(_translate("MainWindow", "Only description for combos"))
         self.actionSerif_Font.setText(_translate("MainWindow", "Serif Font"))
 from visibleWhitespaceTextEdit import VisibleWhitespaceTextEdit
