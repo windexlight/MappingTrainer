@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QSettings, QStandardPaths, QByteArray
 from enum import Enum
 from pathlib import Path
-from typing import Any, Type, Protocol
+from typing import Any, Type, Protocol, Union
 from dataclasses import dataclass, fields
 import re
 import hashlib
@@ -31,44 +31,34 @@ class ModeValue(Enum):
     Words_All = "Words_All"
 
 class ModeSettings(Protocol):
-    WindowGeometry: QByteArray
     FontSize: int
-    SerifFont: bool
-    RandomLocation: bool
-    SkipQuote: bool
     AdvanceOnEnter: bool
     AdvanceOnSpace: bool
 
 class WindowGeometrySettings(Protocol):
     WindowGeometry: QByteArray
 
+
 @dataclass
-class prose(Section):
+class typing(Section):
     WindowGeometry: QByteArray = QByteArray()
-    FontSize = 14
+    FontSize: int = 14
     SerifFont: bool = True
-    RandomLocation: bool = False
     SkipQuote: bool = False
     AdvanceOnEnter: bool = True
     AdvanceOnSpace: bool = True
 
 @dataclass
 class code(Section):
-    WindowGeometry: QByteArray = QByteArray()
-    FontSize = 12
-    SerifFont: bool = False
-    RandomLocation: bool = False
-    SkipQuote: bool = False
+    FontSize: int = 12
     AdvanceOnEnter: bool = True
     AdvanceOnSpace: bool = False
 
 @dataclass
 class words(Section):
     WindowGeometry: QByteArray = QByteArray()
-    FontSize = 18
+    FontSize: int = 18
     SerifFont: bool = True
-    RandomLocation: bool = True
-    SkipQuote: bool = False
     AdvanceOnEnter: bool = False
     AdvanceOnSpace: bool = False
 
@@ -109,7 +99,7 @@ class Settings:
         self._settings.setFallbacksEnabled(False)
 
         # self.font_sizes = self._load(font_sizes)
-        self.prose = self._load(prose)
+        self.typing = self._load(typing)
         self.code = self._load(code)
         self.words = self._load(words)
         self.file = self._load(file)
@@ -164,7 +154,7 @@ class Settings:
             if self.file_settings.IsCode:
                 return self.code
             else:
-                return self.prose
+                return self.typing
         else:
             return self.words
         
@@ -173,12 +163,38 @@ class Settings:
         if self.file.Mode == ModeValue.Key_Practice:
             return self.key_practice
         elif self.file.Mode == ModeValue.Typing_Practice:
-            if self.file_settings.IsCode:
-                return self.code
-            else:
-                return self.prose
+            return self.typing
         else:
             return self.words
+        
+    @property
+    def serif_font(self) -> Union[bool, None]:
+        if self.file.Mode == ModeValue.Typing_Practice:
+            if not self.file_settings.IsCode:
+                return self.typing.SerifFont
+        elif self.file.Mode != ModeValue.Key_Practice:
+            return self.words.SerifFont
+
+    @serif_font.setter
+    def serif_font(self, value: bool):
+        if self.file.Mode == ModeValue.Typing_Practice:
+            if not self.file_settings.IsCode:
+                self.typing.SerifFont = value
+        elif self.file.Mode != ModeValue.Key_Practice:
+            self.words.SerifFont = value
+
+    @property
+    def skip_quote(self) -> bool:
+        if self.file.Mode == ModeValue.Typing_Practice:
+            if not self.file_settings.IsCode:
+                return self.typing.SkipQuote
+    
+    @skip_quote.setter
+    def skip_quote(self, value):
+        if self.file.Mode == ModeValue.Typing_Practice:
+            if not self.file_settings.IsCode:
+                self.typing.SkipQuote = value
+
 
     def _load(self, cls, section_name = None):
         if not section_name:

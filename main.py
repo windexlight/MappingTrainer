@@ -32,6 +32,23 @@ from settings import Settings, ModeValue
 
 QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier]
 
+
+# TODO -- Add additional flags AdvanceOnEnter, AdvanceOnSpace
+# TODO -- Test what happens when starting with empty settings or no file set
+# TODO -- When code file is loaded, highlighting is applied to words mode
+# TODO -- When starting from fresh settings, the first time a file is loaded (at least
+# in the case of the words with spaces file, only the first line is displayed - may or
+# may not also have to do with window geometry) -- think I saw this when using
+# load typing file menu option, not sure if it would also appear when checking. May
+# also have canceled the dialog first.
+# TODO -- On fresh settings, although Serif font defaults to checked, typing files are
+# loaded with sans serif font.
+# TODO -- Make skip quote put a quote in the prompt box..?
+# TODO -- When checking/unchecking skip quote, the highlight color doesn't change.
+# TODO -- You know what, let's just get rid of skip quote. I don't anticipate using it,
+# and it's kind of silly anyway.
+
+
 class mainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -42,6 +59,8 @@ class mainWindow(QtWidgets.QMainWindow):
         QCoreApplication.setApplicationName("MappingTrainer")
 
         self.settings = Settings()
+
+        self._goemetry_initialized = False
 
         self.modeActionGroup = QActionGroup(self)
         self.modeActionGroup.addAction(self.ui.actionKey_Practice)
@@ -109,20 +128,20 @@ class mainWindow(QtWidgets.QMainWindow):
         self.key_practice_font_sizes = [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]
         def closest(target, values):
             return min(values, key=lambda x: abs(x - target))
-        self.settings.prose.FontSize = closest(self.settings.prose.FontSize, self.typing_font_sizes)
+        self.settings.typing.FontSize = closest(self.settings.typing.FontSize, self.typing_font_sizes)
         self.settings.code.FontSize = closest(self.settings.code.FontSize, self.typing_font_sizes)
-        self.settings.words.FontSize = closest(self.settings.words.FontSize, self.typing_font_sizes)
+        self.settings.words.FontSize = closest(self.settings.words.FontSize, self.key_practice_font_sizes)
         self.settings.key_practice.FontSize = closest(self.settings.key_practice.FontSize, self.key_practice_font_sizes)
 
-        self.serif_font = QFont("Noto Serif", self.settings.prose.FontSize)
+        self.serif_font = QFont("Noto Serif", self.settings.typing.FontSize)
         self.serif_font.setKerning(False)
-        self.sans_font = QFont("Lexend", self.settings.prose.FontSize)
+        self.sans_font = QFont("Lexend", self.settings.typing.FontSize)
         self.sans_font.setKerning(False)
-        self.mono_font = QFont("Fira Code", self.settings.prose.FontSize)
+        self.mono_font = QFont("Fira Code", self.settings.typing.FontSize)
         self.mono_font.setKerning(False)
         self.key_practice_font = QFont("Fira Code", self.settings.key_practice.FontSize)
 
-        if self.settings.mode_settings.SerifFont:
+        if self.settings.serif_font:
             self.text_font = self.serif_font
         else:
             self.text_font = self.sans_font
@@ -168,35 +187,32 @@ class mainWindow(QtWidgets.QMainWindow):
             QTimer.singleShot(0, self.updateNumPromptLines) # run after font and size are initialized
         self.ui.textedit_keyPrompt.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    def _restore_geometry(self):
-        geom = self.settings.window_geometry.WindowGeometry
-        if geom and isinstance(geom, QByteArray):
-            self.restoreGeometry(geom)
-            rect = self.frameGeometry()
-            screen = QGuiApplication.primaryScreen().availableGeometry()
-            if not screen.intersects(rect):
-                self.move(screen.center() - self.rect().center())
 
     def _load_mode_settings(self):
         self._restore_geometry()
-        self.ui.actionSerif_Font.setChecked(self.settings.mode_settings.SerifFont)
-        self.ui.actionStart_file_in_random_location.setChecked(self.settings.mode_settings.RandomLocation)
-        self.ui.actionAllow_skip_quote.setChecked(self.settings.mode_settings.SkipQuote)
-        if self.settings.file.Mode == ModeValue.Key_Practice:
+        if (sf := self.settings.serif_font) is not None:
+            self.ui.actionSerif_Font.setVisible(True)
+            self.ui.actionSerif_Font.setChecked(sf)
+        else:
+            self.ui.actionSerif_Font.setVisible(False)
+        if (sq := self.settings.skip_quote) is not None:
+            self.ui.actionAllow_skip_quote.setVisible(True)
+            self.ui.actionAllow_skip_quote.setChecked(sq)
+        else:
+            self.ui.actionAllow_skip_quote.setVisible(False)
+        if kp := (self.settings.file.Mode == ModeValue.Key_Practice):
             self.setKeyPracticeFontSize(self.settings.key_practice.FontSize)
         elif self.settings.file.Mode == ModeValue.Typing_Practice:
             if self.settings.file_settings.IsCode:
                 self.setCodeFontSize(self.settings.code.FontSize)
             else:
-                self.setTypingFontSize(self.settings.prose.FontSize)
+                self.setTypingFontSize(self.settings.typing.FontSize)
         else:
             self.setWordsFontSize(self.settings.words.FontSize)
-        # TODO -- On load, all the font sizes seem to revert to default
-        # TODO -- Add additional flags AdvanceOnEnter, AdvanceOnSpace
-        # TODO -- Remove start file in random location, it's useless
-        # TODO -- Hide Serif font and skip quote options in code mode
-        # TODO -- Hide key practice options when not in key practice
-
+        for x in (self.ui.actionCombos, self.ui.actionFunction, self.ui.actionLowercase,
+                  self.ui.actionUppercase, self.ui.actionModifiers, self.ui.actionNumbers,
+                  self.ui.actionSpecials, self.ui.actionSymbols):
+            x.setVisible(kp)
 
     @qasync.asyncClose
     async def focusOutEvent(self, event):
@@ -221,6 +237,12 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def actionModeTyping(self, state: bool):
         if state:
+            if self.ui.actionTyping_Practice.isChecked():
+                if len(self.promptLines) == 0 or self.word_count > 0:
+                    if not self._ensure_file_loaded():
+                        self.last_mode.setChecked(True)
+                        return
+
             self.rawhid.stop()
             self.ui.label_keyPrompt.setVisible(False)
             self.ui.textedit_keyPrompt.setVisible(True)
@@ -243,11 +265,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
             if self.ui.actionTyping_Practice.isChecked():
                 self.ui.label_line.setVisible(True)
-                if len(self.promptLines) == 0 or self.word_count > 0:
-                    if not self._ensure_file_loaded():
-                        self.last_mode.setChecked(True)
-                        return
-                else:
+                if not (len(self.promptLines) == 0 or self.word_count > 0):
                     self.ui.textedit_keyPrompt.setPlainText(self.typingPromptText)
                 self.word_count = 0
                 self.last_mode = self.ui.actionTyping_Practice
@@ -318,13 +336,13 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def wordsFontSizeUp(self):
         size = self.ui.lineEdit.font().pointSize()
-        idx = min(len(self.typing_font_sizes)-1, bisect.bisect(self.typing_font_sizes, size))
-        self.setWordsFontSize(self.typing_font_sizes[idx])
+        idx = min(len(self.key_practice_font_sizes)-1, bisect.bisect(self.key_practice_font_sizes, size))
+        self.setWordsFontSize(self.key_practice_font_sizes[idx])
 
     def wordsFontSizeDown(self):
         size = self.ui.lineEdit.font().pointSize()
-        idx = max(0, bisect.bisect_left(self.typing_font_sizes, size) - 1)
-        self.setWordsFontSize(self.typing_font_sizes[idx])
+        idx = max(0, bisect.bisect_left(self.key_practice_font_sizes, size) - 1)
+        self.setWordsFontSize(self.key_practice_font_sizes[idx])
 
     def codeFontSizeUp(self):
         size = self.ui.lineEdit.font().pointSize()
@@ -342,7 +360,7 @@ class mainWindow(QtWidgets.QMainWindow):
         if not self.settings.file_settings.IsCode:
             self.setTypingFont(self.text_font)
             self.initTypingFont()
-        self.settings.prose.FontSize = size
+        self.settings.typing.FontSize = size
 
     def setWordsFontSize(self, size):
         self.serif_font.setPointSize(size)
@@ -395,13 +413,16 @@ class mainWindow(QtWidgets.QMainWindow):
 
 
     def loadTypingPromptFile(self):
-        need_load = bool(self.settings.file.Filename)
+        file = self.settings.file.Filename
+        self.settings.file.Filename = None
         if self.settings.file.Mode != ModeValue.Typing_Practice:
             self.ui.actionTyping_Practice.setChecked(True)
         else:
-            self.saveGeometry()
-        if need_load:
-            self._loadTypingPromptFile()
+            if self._loadTypingPromptFile():
+                self._load_mode_settings()
+        if not self.settings.file.Filename:
+            self.settings.file.Filename = file
+
 
     def _loadTypingPromptFile(self, *, filename=None) -> bool:
         if not filename:
@@ -444,11 +465,10 @@ class mainWindow(QtWidgets.QMainWindow):
             else:
                 self.ui.lineEdit.setIndentWithTabs()
         else:
-            self.setTypingFontSize(self.settings.prose.FontSize)
+            self.setTypingFontSize(self.settings.typing.FontSize)
             self.ui.lineEdit.setIndentWithTabs()
         self.promptLines = inputText.split("\n")
-        self.initTypingPrompt(line=self.settings.file_settings.Line, rand=self.settings.mode_settings.RandomLocation)
-        self._load_mode_settings()
+        self.initTypingPrompt(line=self.settings.file_settings.Line)
         return True
 
     def initTypingPrompt(self, *, line=0, rand=False):
@@ -474,22 +494,14 @@ class mainWindow(QtWidgets.QMainWindow):
     def actionSkipQuote(self, state: bool):
         if self.settings.file.Mode != ModeValue.Key_Practice:
             self.lineEditTextChanged()
-        self.settings.mode_settings.SkipQuote = state
-
-    def actionRandomLocation(self, state: bool):
-        self.settings.mode_settings.RandomLocation = state
-
-    # def actionComboDescOnly(self, state: bool):
-    #     self.updateKeyPromptText()
-    #     self.settings.flags.ComboDescOnly = state
-    #     self.saveConfig()
+        self.settings.skip_quote = state
 
     def actionSerifFont(self, state: bool):
         if state:
             self.text_font = self.serif_font
         else:
             self.text_font = self.sans_font
-        self.settings.mode_settings.SerifFont = state
+        self.settings.serif_font = state
         if not self.settings.file_settings.IsCode:
             self.setTypingFont(self.text_font)
 
@@ -575,7 +587,7 @@ class mainWindow(QtWidgets.QMainWindow):
                     if (c == ' ' or c == '\t'):
                         if typed_idx > 0 and typed[typed_idx-1] == ' ':
                             continue
-                    if self.settings.mode_settings.SkipQuote and c == '\"':
+                    if self.settings.skip_quote and c == '\"':
                         continue
                 match = False
                 break
@@ -756,9 +768,21 @@ class mainWindow(QtWidgets.QMainWindow):
         super().closeEvent(event)
 
     def saveGeometry(self):
-        ret = super().saveGeometry()
-        self.settings.window_geometry.WindowGeometry = ret
-        return ret
+        if self._goemetry_initialized:
+            ret = super().saveGeometry()
+            self.settings.window_geometry.WindowGeometry = ret
+            return ret
+
+    def _restore_geometry(self):
+        self._goemetry_initialized = True
+        geom = self.settings.window_geometry.WindowGeometry
+        if geom and isinstance(geom, QByteArray):
+            self.restoreGeometry(geom)
+            rect = self.frameGeometry()
+            screen = QGuiApplication.primaryScreen().availableGeometry()
+            if not screen.intersects(rect):
+                self.move(screen.center() - self.rect().center())
+
 
 
 class AltBlocker(QObject):

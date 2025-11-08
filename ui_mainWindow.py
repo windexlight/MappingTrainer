@@ -271,13 +271,6 @@ class Ui_MainWindow(object):
         self.actionTyping_Practice = QtWidgets.QAction(MainWindow)
         self.actionTyping_Practice.setCheckable(True)
         self.actionTyping_Practice.setObjectName("actionTyping_Practice")
-        self.actionSplit_file_by_period = QtWidgets.QAction(MainWindow)
-        self.actionSplit_file_by_period.setCheckable(True)
-        self.actionSplit_file_by_period.setChecked(False)
-        self.actionSplit_file_by_period.setObjectName("actionSplit_file_by_period")
-        self.actionStart_file_in_random_location = QtWidgets.QAction(MainWindow)
-        self.actionStart_file_in_random_location.setCheckable(True)
-        self.actionStart_file_in_random_location.setObjectName("actionStart_file_in_random_location")
         self.actionLoad_typing_content_file = QtWidgets.QAction(MainWindow)
         self.actionLoad_typing_content_file.setObjectName("actionLoad_typing_content_file")
         self.actionNumbers = QtWidgets.QAction(MainWindow)
@@ -338,7 +331,6 @@ class Ui_MainWindow(object):
         self.menuMode.addAction(self.actionWords_Top_1000)
         self.menuMode.addAction(self.actionWords_All)
         self.menuOptions.addAction(self.actionSerif_Font)
-        self.menuOptions.addAction(self.actionStart_file_in_random_location)
         self.menuOptions.addAction(self.actionAllow_skip_quote)
         self.menuOptions.addAction(self.actionNumbers)
         self.menuOptions.addAction(self.actionSymbols)
@@ -376,7 +368,6 @@ class Ui_MainWindow(object):
         self.actionSerif_Font.toggled['bool'].connect(MainWindow.actionSerifFont) # type: ignore
         self.pushButton_Plus.clicked.connect(MainWindow.plusButton) # type: ignore
         self.pushButton_Minus.clicked.connect(MainWindow.minusButton) # type: ignore
-        self.actionStart_file_in_random_location.toggled['bool'].connect(MainWindow.actionRandomLocation) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -394,8 +385,6 @@ class Ui_MainWindow(object):
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.actionKey_Practice.setText(_translate("MainWindow", "Keys"))
         self.actionTyping_Practice.setText(_translate("MainWindow", "Typing"))
-        self.actionSplit_file_by_period.setText(_translate("MainWindow", "Split content file on punctuation"))
-        self.actionStart_file_in_random_location.setText(_translate("MainWindow", "Start content file in random location"))
         self.actionLoad_typing_content_file.setText(_translate("MainWindow", "Load typing content file..."))
         self.actionNumbers.setText(_translate("MainWindow", "Numbers"))
         self.actionSymbols.setText(_translate("MainWindow", "Symbols"))
@@ -409,6 +398,6 @@ class Ui_MainWindow(object):
         self.actionWords_Top_100.setText(_translate("MainWindow", "Words (Top 100)"))
         self.actionWords_Top_1000.setText(_translate("MainWindow", "Words (Top 1000)"))
         self.actionWords_All.setText(_translate("MainWindow", "Words (All)"))
-        self.actionAllow_skip_quote.setText(_translate("MainWindow", "Allow skipping \" in typing mode"))
+        self.actionAllow_skip_quote.setText(_translate("MainWindow", "Skip Quote"))
         self.actionSerif_Font.setText(_translate("MainWindow", "Serif Font"))
 from visibleWhitespaceTextEdit import VisibleWhitespaceTextEdit

@@ -386,7 +386,6 @@
      <string>Options</string>
     </property>
     <addaction name="actionSerif_Font"/>
-    <addaction name="actionStart_file_in_random_location"/>
     <addaction name="actionAllow_skip_quote"/>
     <addaction name="actionNumbers"/>
     <addaction name="actionSymbols"/>
@@ -425,25 +424,6 @@
    </property>
    <property name="text">
     <string>Typing</string>
-   </property>
-  </action>
-  <action name="actionSplit_file_by_period">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Split content file on punctuation</string>
-   </property>
-  </action>
-  <action name="actionStart_file_in_random_location">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Start content file in random location</string>
    </property>
   </action>
   <action name="actionLoad_typing_content_file">
@@ -576,7 +556,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Allow skipping &quot; in typing mode</string>
+    <string>Skip Quote</string>
    </property>
   </action>
   <action name="actionSerif_Font">
@@ -952,22 +932,6 @@
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>actionStart_file_in_random_location</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>actionRandomLocation(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>263</x>
-     <y>172</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
  <slots>
   <slot>actionModeKey(bool)</slot>
@@ -981,6 +945,5 @@
   <slot>actionSerifFont()</slot>
   <slot>plusButton()</slot>
   <slot>minusButton()</slot>
-  <slot>actionRandomLocation(bool)</slot>
  </slots>
 </ui>
