@@ -507,8 +507,12 @@ class mainWindow(QtWidgets.QMainWindow):
         if self.settings.file.Mode == ModeValue.Typing_Practice:
             self.setTypingPromptLine(self.promptLinesIndex + 1, doTime=doTime)
         else: # Word mode
-            while (i := random.randrange(len(self.promptLines))) == self.promptLinesIndex:
-                pass
+            if len(self.promptLines) <= 1:
+                i = 0
+            else:
+                i = random.randrange(len(self.promptLines)-1)
+                if i >= self.promptLinesIndex:
+                    i += 1
             self.setTypingPromptLine(i, doTime=doTime, typingMode=False)
 
     def WPM(self, text, secs):
