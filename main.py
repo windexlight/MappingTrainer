@@ -34,8 +34,6 @@ QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier
 
 
 # TODO -- Add additional flags AdvanceOnEnter, AdvanceOnSpace
-# TODO -- Test what happens when starting with empty settings or no file set
-# TODO -- When code file is loaded, highlighting is applied to words mode
 # TODO -- Make skip quote put a quote in the prompt box..?
 # TODO -- When checking/unchecking skip quote, the highlight color doesn't change.
 # TODO -- You know what, let's just get rid of skip quote. I don't anticipate using it,
@@ -265,6 +263,7 @@ class mainWindow(QtWidgets.QMainWindow):
                     self.ui.textedit_keyPrompt.setPlainText(self.typingPromptText)
                 self.word_count = 0
                 self.last_mode = self.ui.actionTyping_Practice
+                lexer = self.settings.code_info.lexer
             else:
                 self.ui.label_line.setVisible(False)
                 _words = [x for x in words if len(x) > 1]
@@ -282,6 +281,13 @@ class mainWindow(QtWidgets.QMainWindow):
                     self.word_count = len(_words)
                 self.promptLines = _words[:self.word_count]
                 self.initTypingPrompt(rand=True)
+                lexer = None
+            if hasattr(self, "highlighter"):
+                self.highlighter.set_lexer(lexer)
+                self.highlighter.rehighlight()
+            if hasattr(self, "edit_highlighter"):
+                self.edit_highlighter.set_lexer(lexer)
+                self.edit_highlighter.rehighlight()
             self.initTypingFont()
             self._load_mode_settings()
 
