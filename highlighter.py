@@ -14,8 +14,6 @@ class Highlighter(QSyntaxHighlighter):
         else:
             self.format.setForeground(QColor(0, 170, 0))
 
-        # --- VS Code Light+ color palette ---
-        # Core theme colors
         blue = "#0000FF"
         dark_blue = "#001080"
         brown = "#795E26"
@@ -28,16 +26,13 @@ class Highlighter(QSyntaxHighlighter):
         gray = "#999999"
         black = "#000000"
 
-        # --- token formatting map ---
         self.formats = {
-            # Comments
             Token.Comment: self.make_format(green),
             Token.Comment.Single: self.make_format(green),
             Token.Comment.Multiline: self.make_format(green),
             Token.Comment.Preproc: self.make_format(gray),
             Token.Comment.Special: self.make_format(gray),
 
-            # Keywords
             Token.Keyword: self.make_format(blue),
             Token.Keyword.Constant: self.make_format(blue),
             Token.Keyword.Declaration: self.make_format(blue),
@@ -46,12 +41,10 @@ class Highlighter(QSyntaxHighlighter):
             Token.Keyword.Reserved: self.make_format(blue),
             Token.Keyword.Type: self.make_format(blue),
 
-            # Operators & punctuation
             Token.Operator: self.make_format(black),
             Token.Operator.Word: self.make_format(blue),
             Token.Punctuation: self.make_format(black),
 
-            # Names
             Token.Name: self.make_format(black),
             Token.Name.Builtin: self.make_format(brown),
             Token.Name.Function: self.make_format(brown),
@@ -63,7 +56,6 @@ class Highlighter(QSyntaxHighlighter):
             Token.Name.Variable: self.make_format(dark_blue),
             Token.Name.Exception: self.make_format(purple),
 
-            # Strings
             Token.String: self.make_format(red),
             Token.String.Double: self.make_format(red),
             Token.String.Single: self.make_format(red),
@@ -73,18 +65,15 @@ class Highlighter(QSyntaxHighlighter):
             Token.String.Symbol: self.make_format(red),
             Token.String.Other: self.make_format(red),
 
-            # Numbers
             Token.Number: self.make_format(num_green),
             Token.Number.Integer: self.make_format(num_green),
             Token.Number.Float: self.make_format(num_green),
             Token.Number.Hex: self.make_format(num_green),
             Token.Number.Oct: self.make_format(num_green),
 
-            # Literals
             Token.Literal: self.make_format(num_green),
             Token.Literal.Date: self.make_format(num_green),
 
-            # Generics
             Token.Generic.Heading: self.make_format(blue),
             Token.Generic.Subheading: self.make_format(purple),
             Token.Generic.Deleted: self.make_format(red),
@@ -96,7 +85,6 @@ class Highlighter(QSyntaxHighlighter):
             Token.Generic.Output: self.make_format(gray),
             Token.Generic.Traceback: self.make_format(red),
 
-            # Errors
             Token.Error: self.make_format(red),
         }
 
@@ -140,15 +128,3 @@ class Highlighter(QSyntaxHighlighter):
                 if self.n > 0 and len(text) > 0:
                     length = min(self.n, len(text))
                     self.setFormat(0, length, self.format)
-
-    def _get_format(self, token):
-        # Try exact match first
-        if token in self.formats:
-            return self.formats[token]
-        # Try parent token types
-        parent = token
-        while parent != Token and parent.parent:
-            parent = parent.parent
-            if parent in self.formats:
-                return self.formats[parent]
-        return None
