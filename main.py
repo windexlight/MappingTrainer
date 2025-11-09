@@ -36,8 +36,6 @@ QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier
 # TODO -- Add additional flags AdvanceOnEnter, AdvanceOnSpace
 # TODO -- Test what happens when starting with empty settings or no file set
 # TODO -- When code file is loaded, highlighting is applied to words mode
-# TODO -- On fresh settings, although Serif font defaults to checked, typing files are
-# loaded with sans serif font.
 # TODO -- Make skip quote put a quote in the prompt box..?
 # TODO -- When checking/unchecking skip quote, the highlight color doesn't change.
 # TODO -- You know what, let's just get rid of skip quote. I don't anticipate using it,
@@ -187,7 +185,10 @@ class mainWindow(QtWidgets.QMainWindow):
         self._restore_geometry()
         if (sf := self.settings.serif_font) is not None:
             self.ui.actionSerif_Font.setVisible(True)
+            self.ui.actionSerif_Font.blockSignals(True)
             self.ui.actionSerif_Font.setChecked(sf)
+            self.ui.actionSerif_Font.blockSignals(False)
+            self.ui.actionSerif_Font.toggled.emit(sf)
         else:
             self.ui.actionSerif_Font.setVisible(False)
         if (sq := self.settings.skip_quote) is not None:
