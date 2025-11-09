@@ -36,11 +36,6 @@ QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier
 # TODO -- Add additional flags AdvanceOnEnter, AdvanceOnSpace
 # TODO -- Test what happens when starting with empty settings or no file set
 # TODO -- When code file is loaded, highlighting is applied to words mode
-# TODO -- When starting from fresh settings, the first time a file is loaded (at least
-# in the case of the words with spaces file, only the first line is displayed - may or
-# may not also have to do with window geometry) -- think I saw this when using
-# load typing file menu option, not sure if it would also appear when checking. May
-# also have canceled the dialog first.
 # TODO -- On fresh settings, although Serif font defaults to checked, typing files are
 # loaded with sans serif font.
 # TODO -- Make skip quote put a quote in the prompt box..?
@@ -405,6 +400,8 @@ class mainWindow(QtWidgets.QMainWindow):
         tab_stop_distance = font_metrics.horizontalAdvance(' ') * 4
         self.ui.textedit_keyPrompt.setTabStopDistance(tab_stop_distance)
         self.ui.lineEdit.setTabStopDistance(tab_stop_distance)
+        if self.settings.file.Mode == ModeValue.Typing_Practice:
+            self.updateNumPromptLines()
 
     def getNumberOfPromptLines(self):
         font_metrics = QFontMetricsF(self.ui.textedit_keyPrompt.font())
@@ -474,7 +471,7 @@ class mainWindow(QtWidgets.QMainWindow):
     def initTypingPrompt(self, *, line=0, rand=False):
         self.startTime = None
         if rand:
-            self.setTypingPromptLine(random.randrange(len(self.promptLines)))
+            self.setTypingPromptLine(random.randrange(len(self.promptLines)), typingMode=False)
         else:
             self.setTypingPromptLine(line)
         if self.settings.file.Mode != ModeValue.Key_Practice:
@@ -511,14 +508,14 @@ class mainWindow(QtWidgets.QMainWindow):
         else: # Word mode
             while (i := random.randrange(len(self.promptLines))) == self.promptLinesIndex:
                 pass
-            self.setTypingPromptLine(i, doTime=doTime)
+            self.setTypingPromptLine(i, doTime=doTime, typingMode=False)
 
     def WPM(self, text, secs):
         if text:
             return (text/5.0) / (secs/60.0)
 
 
-    def setTypingPromptLine(self, line: int, *, doTime=True):
+    def setTypingPromptLine(self, line: int, *, doTime=True, typingMode=True):
         if line < 0:
             return
         t = time.time()
@@ -531,17 +528,16 @@ class mainWindow(QtWidgets.QMainWindow):
         else:
             self.ui.label_keysPerSecond.setText(F"WPM: --")
         self.startTime = t
-        typing_mode = self.settings.file.Mode == ModeValue.Typing_Practice
-        if line > 0 and typing_mode:
+        if line > 0 and typingMode:
             self.ui.pushButton_Back.setVisible(True)
         else:
             self.ui.pushButton_Back.setVisible(False)
-        if typing_mode:
+        if typingMode:
             lines = self.getNumberOfPromptLines()
         else:
             lines = 1
         self.promptLinesIndex = line
-        if typing_mode:
+        if typingMode:
             self.settings.file_settings.Line = line
         self.ui.label_line.setText(F"{line+1} / {len(self.promptLines)}")
         line %= len(self.promptLines)
@@ -563,7 +559,8 @@ class mainWindow(QtWidgets.QMainWindow):
         lines = self.getNumberOfPromptLines()
         self.typingPromptText = '\n'.join(self.promptLines[self.promptLinesIndex : self.promptLinesIndex + lines])
         self.ui.textedit_keyPrompt.setPlainText(self.typingPromptText)
-        self.highlighter.rehighlight()
+        if hasattr(self, "highlighter"):
+            self.highlighter.rehighlight()
 
     def lineEditTextChanged(self):
         if self.changing_line_edit_text:
