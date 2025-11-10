@@ -41,10 +41,14 @@ QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier
 
 
 class mainWindow(QtWidgets.QMainWindow):
+    attemptAdvance = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.attemptAdvance.connect(self.attemptPromptAdvance)
 
         QCoreApplication.setOrganizationName("windexlight")
         QCoreApplication.setApplicationName("MappingTrainer")
@@ -613,15 +617,23 @@ class mainWindow(QtWidgets.QMainWindow):
             if hasattr(self, "edit_highlighter"):
                 self.edit_highlighter.setHighlightLen(typed_idx)
                 self.edit_highlighter.rehighlight()
-            if self.match and not match and len(typed) > 0 and typed[-1] == ' ':
-                self.ui.lineEdit.enterPressed.emit()
+            ms = self.settings.mode_settings
+            if ms.AdvanceOnSpace and self.match and not match and len(typed) > 0 and typed[-1] == ' ':
+                self.attemptAdvance.emit()
             else:
                 self.match = match
+            if self.match and not (ms.AdvanceOnEnter or ms.AdvanceOnSpace):
+                self.attemptAdvance.emit()
 
         self.changing_line_edit_text = False
 
     @qasync.asyncSlot()
     async def lineEditEnterPressed(self):
+        if self.settings.mode_settings.AdvanceOnEnter:
+            await self.attemptPromptAdvance()
+
+    @qasync.asyncSlot()
+    async def attemptPromptAdvance(self):
         if self.processing_line_edit_enter_pressed:
             return
         self.processing_line_edit_enter_pressed = True
