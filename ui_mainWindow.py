@@ -324,6 +324,12 @@ class Ui_MainWindow(object):
         self.actionSerif_Font.setCheckable(True)
         self.actionSerif_Font.setChecked(True)
         self.actionSerif_Font.setObjectName("actionSerif_Font")
+        self.actionAdvance_On_Enter = QtWidgets.QAction(MainWindow)
+        self.actionAdvance_On_Enter.setCheckable(True)
+        self.actionAdvance_On_Enter.setObjectName("actionAdvance_On_Enter")
+        self.actionAdvance_On_Space = QtWidgets.QAction(MainWindow)
+        self.actionAdvance_On_Space.setCheckable(True)
+        self.actionAdvance_On_Space.setObjectName("actionAdvance_On_Space")
         self.menuMode.addAction(self.actionKey_Practice)
         self.menuMode.addAction(self.actionTyping_Practice)
         self.menuMode.addAction(self.actionWords_Top_10)
@@ -331,6 +337,8 @@ class Ui_MainWindow(object):
         self.menuMode.addAction(self.actionWords_Top_1000)
         self.menuMode.addAction(self.actionWords_All)
         self.menuOptions.addAction(self.actionSerif_Font)
+        self.menuOptions.addAction(self.actionAdvance_On_Enter)
+        self.menuOptions.addAction(self.actionAdvance_On_Space)
         self.menuOptions.addAction(self.actionAllow_skip_quote)
         self.menuOptions.addAction(self.actionNumbers)
         self.menuOptions.addAction(self.actionSymbols)
@@ -368,6 +376,8 @@ class Ui_MainWindow(object):
         self.actionSerif_Font.toggled['bool'].connect(MainWindow.actionSerifFont) # type: ignore
         self.pushButton_Plus.clicked.connect(MainWindow.plusButton) # type: ignore
         self.pushButton_Minus.clicked.connect(MainWindow.minusButton) # type: ignore
+        self.actionAdvance_On_Enter.toggled['bool'].connect(MainWindow.actionAdvanceOnEnter) # type: ignore
+        self.actionAdvance_On_Space.toggled['bool'].connect(MainWindow.actionAdvanceOnSpace) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -400,4 +410,6 @@ class Ui_MainWindow(object):
         self.actionWords_All.setText(_translate("MainWindow", "Words (All)"))
         self.actionAllow_skip_quote.setText(_translate("MainWindow", "Skip Quote"))
         self.actionSerif_Font.setText(_translate("MainWindow", "Serif Font"))
+        self.actionAdvance_On_Enter.setText(_translate("MainWindow", "Advance On Enter"))
+        self.actionAdvance_On_Space.setText(_translate("MainWindow", "Advance On Space"))
 from visibleWhitespaceTextEdit import VisibleWhitespaceTextEdit

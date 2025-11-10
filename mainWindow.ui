@@ -386,6 +386,8 @@
      <string>Options</string>
     </property>
     <addaction name="actionSerif_Font"/>
+    <addaction name="actionAdvance_On_Enter"/>
+    <addaction name="actionAdvance_On_Space"/>
     <addaction name="actionAllow_skip_quote"/>
     <addaction name="actionNumbers"/>
     <addaction name="actionSymbols"/>
@@ -568,6 +570,22 @@
    </property>
    <property name="text">
     <string>Serif Font</string>
+   </property>
+  </action>
+  <action name="actionAdvance_On_Enter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Advance On Enter</string>
+   </property>
+  </action>
+  <action name="actionAdvance_On_Space">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Advance On Space</string>
    </property>
   </action>
  </widget>
@@ -932,6 +950,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAdvance_On_Enter</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>actionAdvanceOnEnter(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>172</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAdvance_On_Space</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>actionAdvanceOnSpace(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>172</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>actionModeKey(bool)</slot>
@@ -945,5 +995,7 @@
   <slot>actionSerifFont()</slot>
   <slot>plusButton()</slot>
   <slot>minusButton()</slot>
+  <slot>actionAdvanceOnEnter(bool)</slot>
+  <slot>actionAdvanceOnSpace(bool)</slot>
  </slots>
 </ui>

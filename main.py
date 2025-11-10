@@ -33,7 +33,6 @@ from settings import Settings, ModeValue
 QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier]
 
 
-# TODO -- Add additional flags AdvanceOnEnter, AdvanceOnSpace
 # TODO -- Make skip quote put a quote in the prompt box..?
 # TODO -- When checking/unchecking skip quote, the highlight color doesn't change.
 # TODO -- You know what, let's just get rid of skip quote. I don't anticipate using it,
@@ -207,6 +206,12 @@ class mainWindow(QtWidgets.QMainWindow):
                 self.setTypingFontSize(self.settings.typing.FontSize)
         else:
             self.setWordsFontSize(self.settings.words.FontSize)
+        self.ui.actionAdvance_On_Enter.setVisible(not kp)
+        self.ui.actionAdvance_On_Space.setVisible(not kp)
+        if not kp:
+            ms = self.settings.mode_settings
+            self.ui.actionAdvance_On_Enter.setChecked(ms.AdvanceOnEnter)
+            self.ui.actionAdvance_On_Space.setChecked(ms.AdvanceOnSpace)
         for x in (self.ui.actionCombos, self.ui.actionFunction, self.ui.actionLowercase,
                   self.ui.actionUppercase, self.ui.actionModifiers, self.ui.actionNumbers,
                   self.ui.actionSpecials, self.ui.actionSymbols):
@@ -503,6 +508,12 @@ class mainWindow(QtWidgets.QMainWindow):
         if self.settings.file.Mode != ModeValue.Key_Practice:
             self.lineEditTextChanged()
         self.settings.skip_quote = state
+
+    def actionAdvanceOnEnter(self, state: bool):
+        self.settings.mode_settings.AdvanceOnEnter = state
+
+    def actionAdvanceOnSpace(self, state: bool):
+        self.settings.mode_settings.AdvanceOnSpace = state
 
     def actionSerifFont(self, state: bool):
         if state:
