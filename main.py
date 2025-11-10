@@ -32,13 +32,6 @@ from settings import Settings, ModeValue
 
 QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier]
 
-
-# TODO -- Make skip quote put a quote in the prompt box..?
-# TODO -- When checking/unchecking skip quote, the highlight color doesn't change.
-# TODO -- You know what, let's just get rid of skip quote. I don't anticipate using it,
-# and it's kind of silly anyway.
-
-
 class mainWindow(QtWidgets.QMainWindow):
     attemptAdvance = pyqtSignal()
 
@@ -192,11 +185,6 @@ class mainWindow(QtWidgets.QMainWindow):
             self.ui.actionSerif_Font.toggled.emit(sf)
         else:
             self.ui.actionSerif_Font.setVisible(False)
-        if (sq := self.settings.skip_quote) is not None:
-            self.ui.actionAllow_skip_quote.setVisible(True)
-            self.ui.actionAllow_skip_quote.setChecked(sq)
-        else:
-            self.ui.actionAllow_skip_quote.setVisible(False)
         if kp := (self.settings.file.Mode == ModeValue.Key_Practice):
             self.setKeyPracticeFontSize(self.settings.key_practice.FontSize)
         elif self.settings.file.Mode == ModeValue.Typing_Practice:
@@ -504,11 +492,6 @@ class mainWindow(QtWidgets.QMainWindow):
         self.setTypingPromptLine(self.promptLinesIndex - 1, doTime=False)
         self.ui.lineEdit.setFocus()
 
-    def actionSkipQuote(self, state: bool):
-        if self.settings.file.Mode != ModeValue.Key_Practice:
-            self.lineEditTextChanged()
-        self.settings.skip_quote = state
-
     def actionAdvanceOnEnter(self, state: bool):
         self.settings.mode_settings.AdvanceOnEnter = state
 
@@ -610,8 +593,6 @@ class mainWindow(QtWidgets.QMainWindow):
                     if (c == ' ' or c == '\t'):
                         if typed_idx > 0 and typed[typed_idx-1] == ' ':
                             continue
-                    if self.settings.skip_quote and c == '\"':
-                        continue
                 match = False
                 break
             else:

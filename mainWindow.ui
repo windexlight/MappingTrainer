@@ -388,7 +388,6 @@
     <addaction name="actionSerif_Font"/>
     <addaction name="actionAdvance_On_Enter"/>
     <addaction name="actionAdvance_On_Space"/>
-    <addaction name="actionAllow_skip_quote"/>
     <addaction name="actionNumbers"/>
     <addaction name="actionSymbols"/>
     <addaction name="actionSpecials"/>
@@ -551,14 +550,6 @@
    </property>
    <property name="text">
     <string>Words (All)</string>
-   </property>
-  </action>
-  <action name="actionAllow_skip_quote">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Skip Quote</string>
    </property>
   </action>
   <action name="actionSerif_Font">
@@ -887,22 +878,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionAllow_skip_quote</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>actionSkipQuote(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>263</x>
-     <y>145</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionSerif_Font</sender>
    <signal>toggled(bool)</signal>
    <receiver>MainWindow</receiver>
@@ -991,7 +966,6 @@
   <slot>keyTypeToggled(bool)</slot>
   <slot>nextButton()</slot>
   <slot>backButton()</slot>
-  <slot>actionSkipQuote(bool)</slot>
   <slot>actionSerifFont()</slot>
   <slot>plusButton()</slot>
   <slot>minusButton()</slot>

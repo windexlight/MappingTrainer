@@ -44,7 +44,6 @@ class typing(Section):
     WindowGeometry: QByteArray = QByteArray()
     FontSize: int = 14
     SerifFont: bool = True
-    SkipQuote: bool = False
     AdvanceOnEnter: bool = True
     AdvanceOnSpace: bool = True
 
@@ -182,19 +181,6 @@ class Settings:
                 self.typing.SerifFont = value
         elif self.file.Mode != ModeValue.Key_Practice:
             self.words.SerifFont = value
-
-    @property
-    def skip_quote(self) -> bool:
-        if self.file.Mode == ModeValue.Typing_Practice:
-            if not self.file_settings.IsCode:
-                return self.typing.SkipQuote
-    
-    @skip_quote.setter
-    def skip_quote(self, value):
-        if self.file.Mode == ModeValue.Typing_Practice:
-            if not self.file_settings.IsCode:
-                self.typing.SkipQuote = value
-
 
     def _load(self, cls, section_name = None):
         if not section_name:
