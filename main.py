@@ -23,6 +23,7 @@ from ui_mainWindow import Ui_MainWindow
 from scancodes import *
 from keycodes import *
 from keynames import keynames
+from char_translations import *
 import combos
 from words_no_swears import words
 from rawhid import RawHid
@@ -583,6 +584,7 @@ class mainWindow(QtWidgets.QMainWindow):
             prompt = self.typingPromptText.split("\n")[0]
             match = True
             for prompt_idx, c in enumerate(prompt):
+                c = char_translations.get(c) or c
                 if typed_idx >= len(typed):
                     match = False
                     break
