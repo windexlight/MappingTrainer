@@ -100,8 +100,11 @@ class mainWindow(QtWidgets.QMainWindow):
         self.rawhid.keyEvent.connect(self.rawHidUpdate)
         self.rawhid.statusChanged.connect(self.rawHidStatusChanged)
 
-        blocker = AltBlocker(self)
-        self.menuBar().installEventFilter(blocker)
+        self.blocker = AltBlocker(self)
+        self.menuBar().installEventFilter(self.blocker)
+
+        self.translator = CharTranslator(self.ui.textedit_keyPrompt)
+        self.ui.lineEdit.installEventFilter(self.translator)
 
         self.setWindowIcon(QIcon('icon-esc.svg'))
 
@@ -584,7 +587,6 @@ class mainWindow(QtWidgets.QMainWindow):
             prompt = self.typingPromptText.split("\n")[0]
             match = True
             for prompt_idx, c in enumerate(prompt):
-                c = char_translations.get(c) or c
                 if typed_idx >= len(typed):
                     match = False
                     break
@@ -805,6 +807,23 @@ class AltBlocker(QObject):
             return True
         if e.type() == QEvent.KeyPress and e.key() == Qt.Key_Alt:
             return True
+        return super().eventFilter(obj, e)
+    
+class CharTranslator(QObject):
+    def __init__(self, prompt: QPlainTextEdit):
+        super().__init__()
+        self.prompt = prompt
+    def eventFilter(self, obj: QPlainTextEdit, e: QKeyEvent):
+        if e.type() == QEvent.KeyPress:
+            if c := e.text():
+                if promptText := self.prompt.toPlainText().split("\n")[0]:
+                    cursor = obj.textCursor()
+                    pos = cursor.position()
+                    if len(promptText) > pos:
+                        if p := char_translations.get(promptText[pos]):
+                            if p == c:
+                                cursor.insertText(promptText[pos])
+                                return True
         return super().eventFilter(obj, e)
 
 
