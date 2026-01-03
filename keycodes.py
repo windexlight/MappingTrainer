@@ -232,14 +232,14 @@ keycodeTranslations = {
     keycode.KC_RIGHT_GUI: keycode.KC_LEFT_GUI,
 }
 
-def processKeycode(k) -> keycode:
+def processKeycode(k) -> keycode | None:
     if k in keycodeSet:
         k = keycode(k)
         if k in keycodeTranslations:
             k = keycodeTranslations[k]
         return k
     
-def keycodeToScancode(k) -> scancode:
+def keycodeToScancode(k) -> scancode | None:
     if (k := processKeycode(k)) is not None:
         return keycodes_to_scancodes.get(k)
 

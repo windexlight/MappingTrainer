@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QFont
+from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QFont
 from pygments.token import Token
 from pygments import lex
 
@@ -8,11 +8,11 @@ class Highlighter(QSyntaxHighlighter):
         self.n = 0
         self.lexer = lexer
         self.invert = invert
-        self.format = QTextCharFormat()
+        self.text_char_format = QTextCharFormat()
         if invert:
-            self.format.setForeground(QColor(170, 0, 0))
+            self.text_char_format.setForeground(QColor(170, 0, 0))
         else:
-            self.format.setForeground(QColor(0, 170, 0))
+            self.text_char_format.setForeground(QColor(0, 170, 0))
 
         blue = "#0000FF"
         dark_blue = "#001080"
@@ -95,7 +95,7 @@ class Highlighter(QSyntaxHighlighter):
         fmt = QTextCharFormat()
         fmt.setForeground(QColor(color))
         if bold:
-            fmt.setFontWeight(QFont.Bold)
+            fmt.setFontWeight(QFont.Weight.Bold)
         if italic:
             fmt.setFontItalic(True)
         if underline:
@@ -123,8 +123,8 @@ class Highlighter(QSyntaxHighlighter):
         if self.currentBlock().blockNumber() == 0:  # first line
             if self.invert:
                 if self.n < len(text) and len(text) > 0:
-                    self.setFormat(self.n, len(text)-self.n, self.format)
+                    self.setFormat(self.n, len(text)-self.n, self.text_char_format)
             else:
                 if self.n > 0 and len(text) > 0:
                     length = min(self.n, len(text))
-                    self.setFormat(0, length, self.format)
+                    self.setFormat(0, length, self.text_char_format)

@@ -2,7 +2,7 @@ import atexit
 import hid
 import qasync
 from time import time
-from PyQt5.QtCore import QTimer, QObject, pyqtSignal
+from PySide6.QtCore import QTimer, QObject, Signal
 from typing import List, Tuple
 
 from keycodes import *
@@ -21,8 +21,8 @@ RAW_HID_READ_INTERVAL = int(1000/120)
 RAW_HID_TRY_CONNECT_INTERVAL = 500
 
 class RawHid(QObject):
-    keyEvent = pyqtSignal(list)
-    statusChanged = pyqtSignal()
+    keyEvent = Signal(list)
+    statusChanged = Signal()
 
     def __init__(self):
         super().__init__()
@@ -128,6 +128,8 @@ class RawHid(QObject):
         self.keys = [k for k in self.keys if not any(x in released for x in (k if isinstance(k, tuple) else (k,)))]
         self.keys.extend(pressed if not self.mods else ((*self.mods, x) for x in pressed))
         mods_pressed = [x for x in self.mods if not self.keys or not all(x in (y if isinstance(y, tuple) else (y,)) for y in self.keys)]
+        # TODO - logging f"[] --- [(<scancode.LCtrl: 29>, <scancode.LShift: 42>, <scancode.BackslashPipe: 43>)]" here at point of exception.
+        # why is self.keys a tuple here?
         self.keys = [*mods_pressed, *self.keys]
         self.keyEvent.emit(self.keys)
 
@@ -143,7 +145,7 @@ class RawHid(QObject):
             self.active = False
             self.statusChanged.emit()
 
-def key_bit_set(key: int, keys: List[int]) -> bool:
+def key_bit_set(key: int, keys: List[int]) -> bool | None:
     if (key >> 3) < len(keys):
         return (keys[key >> 3] & (1 << (key & 7))) > 0
 

@@ -136,7 +136,7 @@ scancodeTranslations = {
     scancode.RWin: scancode.LWin,
 }
 
-def processScancode(k) -> scancode:
+def processScancode(k) -> scancode | None:
     if k in scancodeSet:
         k = scancode(k)
         if k in scancodeTranslations:

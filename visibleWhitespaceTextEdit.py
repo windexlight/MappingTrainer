@@ -1,13 +1,13 @@
 import sys
 import re
-from PyQt5.QtWidgets import QApplication, QPlainTextEdit
-from PyQt5.QtGui import QPainter, QColor, QFontMetrics, QTextCursor
-from PyQt5.QtCore import Qt, pyqtSignal
+from PySide6.QtWidgets import QApplication, QPlainTextEdit
+from PySide6.QtGui import QPainter, QColor, QFontMetrics, QTextCursor
+from PySide6.QtCore import Qt, Signal
 
 class VisibleWhitespaceTextEdit(QPlainTextEdit):
-    enterPressed = pyqtSignal()
-    backPressed = pyqtSignal()
-    forwardPressed = pyqtSignal()
+    enterPressed = Signal()
+    backPressed = Signal()
+    forwardPressed = Signal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -72,9 +72,9 @@ class VisibleWhitespaceTextEdit(QPlainTextEdit):
                 if ch == " ":
                     if i > 0 and text[i-1] == " " or \
                         i < len(text)-1 and text[i+1] == " ":
-                        painter.drawText(rect.x(), baseline_y, "·")
+                        painter.drawText(rect.x(), int(baseline_y), "·")
                 if ch == "\t":
-                    painter.drawText(rect.x(), baseline_y, "→")
+                    painter.drawText(rect.x(), int(baseline_y), "→")
 
                 if i == self.n-1:
                     if self.invert:
@@ -87,7 +87,7 @@ class VisibleWhitespaceTextEdit(QPlainTextEdit):
                 cursor.setPosition(block.position() + len(text))
                 rect = self.cursorRect(cursor)
                 painter.drawText(rect.x(),
-                                    baseline_y, "↲")
+                                    int(baseline_y), "↲")
 
             block = block.next()
             top = int(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
@@ -95,24 +95,24 @@ class VisibleWhitespaceTextEdit(QPlainTextEdit):
         painter.end()
 
     def keyPressEvent(self, event):
-        if event.modifiers() & Qt.AltModifier:
-            if event.key() == Qt.Key_Left:
+        if event.modifiers() & Qt.KeyboardModifier.AltModifier:
+            if event.key() == Qt.Key.Key_Left:
                 self.backPressed.emit()
                 return
-            elif event.key() == Qt.Key_Right:
+            elif event.key() == Qt.Key.Key_Right:
                 self.forwardPressed.emit()
                 return
-        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+        if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             self.enterPressed.emit()
             event.ignore()  # prevent newlines
-        elif event.key() == Qt.Key_Tab:
+        elif event.key() == Qt.Key.Key_Tab:
             cursor = self.textCursor()
             if self.indent_with_spaces:
                 tab = " " * self.spaces_per_indent_level
             else:
                 tab = "\t"
             cursor.insertText(tab)
-        elif event.key() == Qt.Key_Backtab:  # Shift+Tab
+        elif event.key() == Qt.Key.Key_Backtab:  # Shift+Tab
             cursor = self.textCursor()
             pos = cursor.position()
             text = self.toPlainText()
@@ -134,9 +134,9 @@ class VisibleWhitespaceTextEdit(QPlainTextEdit):
                     spaces = g.group(0)
                     to_del = min(len(spaces), self.spaces_per_indent_level)
                     cursor.setPosition(0)
-                    cursor.setPosition(to_del, cursor.KeepAnchor)
+                    cursor.setPosition(to_del, cursor.MoveMode.KeepAnchor)
                     cursor.removeSelectedText()
-        elif event.key() in (Qt.Key_Up, Qt.Key_Down, Qt.Key_PageUp, Qt.Key_PageDown):
+        elif event.key() in (Qt.Key.Key_Up, Qt.Key.Key_Down, Qt.Key.Key_PageUp, Qt.Key.Key_PageDown):
             return
         else:
             super().keyPressEvent(event)

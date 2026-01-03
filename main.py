@@ -5,6 +5,7 @@ import os
 import random
 import time
 import re
+import sys
 from pathlib import Path
 import hid
 import ctypes
@@ -12,12 +13,12 @@ import hashlib
 import math
 
 import qasync
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QEvent, QObject, QByteArray, QCoreApplication
-from PyQt5.QtGui import (QColor, QKeyEvent, QIcon, QFontMetricsF, QFont, QTextOption,
-                         QTextCursor, QTextCharFormat, QFontDatabase, QSyntaxHighlighter, QGuiApplication)
-from PyQt5.QtWidgets import (QDialog, QFileDialog, QHeaderView, QInputDialog, QLabel, QApplication, QLineEdit, QPlainTextEdit,
-                             QLabel, QMessageBox, QTableWidgetItem, QAbstractButton, QCheckBox, QActionGroup)
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt, QTimer, Signal, QEvent, QObject, QByteArray, QCoreApplication
+from PySide6.QtGui import (QColor, QKeyEvent, QIcon, QFontMetricsF, QFont, QTextOption,
+                         QTextCursor, QTextCharFormat, QFontDatabase, QSyntaxHighlighter, QGuiApplication, QActionGroup)
+from PySide6.QtWidgets import (QDialog, QFileDialog, QHeaderView, QInputDialog, QLabel, QApplication, QLineEdit, QPlainTextEdit,
+                             QLabel, QMessageBox, QTableWidgetItem, QAbstractButton, QCheckBox)
 
 from ui_mainWindow import Ui_MainWindow
 from scancodes import *
@@ -31,10 +32,10 @@ from highlighter import Highlighter
 from detect_code_info import detect_code_info, CodeInfo, IndentType
 from settings import Settings, ModeValue
 
-QT_MODS = [Qt.ControlModifier, Qt.ShiftModifier, Qt.AltModifier, Qt.MetaModifier]
+QT_MODS = [Qt.KeyboardModifier.ControlModifier, Qt.KeyboardModifier.ShiftModifier, Qt.KeyboardModifier.AltModifier, Qt.KeyboardModifier.MetaModifier]
 
 class mainWindow(QtWidgets.QMainWindow):
-    attemptAdvance = pyqtSignal()
+    attemptAdvance = Signal()
 
     def __init__(self):
         super().__init__()
@@ -62,7 +63,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.ui.label_line.setVisible(False)
         self.ui.textedit_keyPrompt.setVisible(False)
         self.keysPressed = []
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.lastKeyTime = None
         self.keyCombos = []
         self.updating_key_prompt = False
@@ -72,9 +73,9 @@ class mainWindow(QtWidgets.QMainWindow):
         self.last_indent = ""
 
 
-        self.ui.lineEdit.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.ui.lineEdit.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.ui.lineEdit.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.ui.lineEdit.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.ui.lineEdit.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.ui.lineEdit.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
         self.ui.lineEdit.enterPressed.connect(self.lineEditEnterPressed)
         self.ui.lineEdit.backPressed.connect(self.backButton)
         self.ui.lineEdit.forwardPressed.connect(self.nextButton)
@@ -89,7 +90,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.greenLineEditStyle = re.sub(R"background-color:\s*#[0-9a-fA-F]{3,6};", "background-color: #bbffbb;", self.baseLineEditStyle)
 
         self.ui.textedit_keyPrompt.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
-        self.ui.textedit_keyPrompt.setWordWrapMode(QTextOption.NoWrap)
+        self.ui.textedit_keyPrompt.setWordWrapMode(QTextOption.WrapMode.NoWrap)
 
         self.promptLines = []
         self.promptLinesIndex = 0
@@ -176,7 +177,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
         if mode == ModeValue.Typing_Practice:
             QTimer.singleShot(0, self.updateNumPromptLines) # run after font and size are initialized
-        self.ui.textedit_keyPrompt.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.ui.textedit_keyPrompt.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
 
     def _load_mode_settings(self):
@@ -679,7 +680,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.settings.key_practice.Uppercase = self.ui.actionUppercase.isChecked()
 
     def eventFilter(self, source, event: QKeyEvent):
-        if (t := event.type()) in [QEvent.KeyPress, QEvent.KeyRelease]:
+        if (t := event.type()) in [QEvent.Type.KeyPress, QEvent.Type.KeyRelease]:
             if not self.rawhid.active:
                 if self.settings.file.Mode == ModeValue.Key_Practice:
                     if not event.isAutoRepeat():
@@ -687,7 +688,7 @@ class mainWindow(QtWidgets.QMainWindow):
                         if not (k := processScancode(sc)):
                             print(F"Unrecognized scancode {sc}")
                         else:
-                            if t == QEvent.KeyPress:
+                            if t == QEvent.Type.KeyPress:
                                 asyncio.create_task(self.handle_key_pressed(k, event.modifiers()))
                             else:
                                 asyncio.create_task(self.handle_key_released(k))
@@ -772,6 +773,8 @@ class mainWindow(QtWidgets.QMainWindow):
         else:
             self.lastKeyTime = t
             self.totalKeysPressed += 1
+            if self.startTime is None:
+                raise Exception()
             self.ui.label_keysPerSecond.setText(F"WPM: {self.WPM(self.totalKeysPressed, t - self.startTime):0.2f}")
 
     def resizeEvent(self, event):
@@ -803,9 +806,9 @@ class mainWindow(QtWidgets.QMainWindow):
 
 class AltBlocker(QObject):
     def eventFilter(self, obj, e):
-        if e.type() == QEvent.ShortcutOverride and e.key() == Qt.Key_Alt:
+        if e.type() == QEvent.Type.ShortcutOverride and e.key() == Qt.Key.Key_Alt:
             return True
-        if e.type() == QEvent.KeyPress and e.key() == Qt.Key_Alt:
+        if e.type() == QEvent.Type.KeyPress and e.key() == Qt.Key.Key_Alt:
             return True
         return super().eventFilter(obj, e)
     
@@ -814,7 +817,7 @@ class CharTranslator(QObject):
         super().__init__()
         self.prompt = prompt
     def eventFilter(self, obj: QPlainTextEdit, e: QKeyEvent):
-        if e.type() == QEvent.KeyPress:
+        if e.type() == QEvent.Type.KeyPress:
             if c := e.text():
                 if promptText := self.prompt.toPlainText().split("\n")[0]:
                     cursor = obj.textCursor()
@@ -828,15 +831,18 @@ class CharTranslator(QObject):
 
 
 if __name__ == "__main__":
-    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
-    os.environ["QT_SCALE_FACTOR"] = "1"
+    # os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+    # os.environ["QT_SCALE_FACTOR"] = "1"
     app = QtWidgets.QApplication([])
+    app.setStyle("Fusion")
+    # app.setPalette(app.style().standardPalette())
     loop = qasync.QEventLoop(app)
     asyncio.set_event_loop(loop)
     main_window = mainWindow()
     app.installEventFilter(main_window)
-    myappid = u'windexlight.mappingtrainer.app.1'
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    if sys.platform == "win32":
+        myappid = u'windexlight.mappingtrainer.app.1'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     main_window.show()
     with loop:
         loop.run_forever()

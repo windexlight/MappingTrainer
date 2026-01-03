@@ -11,10 +11,10 @@ class IndentType(Enum):
 
 class CodeInfo:
     is_code: bool = False
-    lexer: Lexer = None
-    language: str = None
-    indent_type: IndentType = None
-    indent_size: int = None
+    lexer: Lexer | None = None
+    language: str | None = None
+    indent_type: IndentType | None = None
+    indent_size: int | None = None
 
 def detect_code_info(filename: str, text: str):
     result = CodeInfo()

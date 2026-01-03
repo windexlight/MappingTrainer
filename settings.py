@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QSettings, QStandardPaths, QByteArray
+from PySide6.QtCore import QSettings, QStandardPaths, QByteArray
 from enum import Enum
 from pathlib import Path
 from typing import Any, Type, Protocol, Union
@@ -9,8 +9,8 @@ from pygments.lexers import get_lexer_by_name
 import detect_code_info
 
 class Section:
-    _settings: QSettings = None
-    _section_name: str = None
+    _settings: QSettings | None = None
+    _section_name: str | None = None
     _loaded = False
     def __setattr__(self, name, value):
         super().__setattr__(name, value)
@@ -77,24 +77,24 @@ class key_practice(Section):
 @dataclass
 class file(Section):
     Mode: ModeValue = ModeValue.Key_Practice
-    Filename: str = None
-    Sha256: str = None
+    Filename: str | None = None
+    Sha256: str | None = None
 
 @dataclass
 class FileSettings(Section):
     Line: int = 0
     IsCode: bool = False
-    CodeLanguage: str = None
-    IndentType: detect_code_info.IndentType = None
-    IndentSize: int = None
+    CodeLanguage: str | None = None
+    IndentType: detect_code_info.IndentType | None = None
+    IndentSize: int | None = None
 
 
 class Settings:
     def __init__(self):
-        config_dir = Path(QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation))
+        config_dir = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppConfigLocation))
         config_dir.mkdir(parents=True, exist_ok=True)
         self._path = config_dir / "settings.ini"
-        self._settings = QSettings(str(self._path), QSettings.IniFormat)
+        self._settings = QSettings(str(self._path), QSettings.Format.IniFormat)
         self._settings.setFallbacksEnabled(False)
 
         # self.font_sizes = self._load(font_sizes)
@@ -114,6 +114,8 @@ class Settings:
     def file_settings(self) -> FileSettings:
         if not self.file.Filename:
             return FileSettings()
+        if self.file.Sha256 is None:
+            raise Exception()
         if (key := f"{Path(self.file.Filename).name}_{str.lower(self.file.Sha256)}") not in self._file_settings:
             fs = FileSettings()
             fs._settings = self._settings
@@ -122,7 +124,7 @@ class Settings:
             self._file_settings[key] = fs
         return self._file_settings[key]
     
-    def have_file(self, path: str, sha256: str) -> str:
+    def have_file(self, path: str, sha256: str) -> bool:
         return f"{Path(path).name}_{str.lower(sha256)}" in self._file_settings
     
     @property
@@ -130,6 +132,8 @@ class Settings:
         ret = detect_code_info.CodeInfo()
         fs = self.file_settings
         try:
+            if fs.CodeLanguage is None:
+                raise Exception()
             lexer = get_lexer_by_name(fs.CodeLanguage)
         except:
             return ret
@@ -144,8 +148,8 @@ class Settings:
         fs = self.file_settings
         fs.IsCode = code_info.is_code
         fs.CodeLanguage = code_info.language if code_info.language is not None else ""
-        fs.IndentType = code_info.indent_type if code_info.indent_type is not None else ""
-        fs.IndentSize = code_info.indent_size if code_info.indent_size is not None else ""
+        fs.IndentType = code_info.indent_type
+        fs.IndentSize = code_info.indent_size
 
     @property
     def mode_settings(self) -> ModeSettings:
@@ -210,7 +214,7 @@ class Settings:
             elif issubclass(typ, Enum):
                 return typ[raw]
             elif typ is QByteArray:
-                if isinstance(raw, QByteArray) and len(raw) < 1024:
+                if isinstance(raw, QByteArray) and raw.size() < 1024:
                     return raw
                 return QByteArray()
             elif typ is bool:
