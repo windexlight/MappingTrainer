@@ -1,6 +1,6 @@
 # Mapping Trainer
 
-Python utility to practice new keyboard mappings.
+Python utility to practice new keyboard mappings and type-read books.
 
 ## Setup
 
@@ -17,14 +17,9 @@ Python utility to practice new keyboard mappings.
 1. pip install Pygments
 1. pip install detect-indent
 
-Will need hidapi.dll in the root folder of the Python source:
-https://github.com/libusb/hidapi/releases/latest
-
 ## TODO
 
 - Allow selection between indentation styles in case auto-detection doesn't work
-- Update to PySide6
-- DeprecationWarning: sipPyTypeDict() is deprecated, the extension module should use sipPyTypeDictRef() instead
 - Add an options dialog
 - Save stats in a database of some kind (DuckDB or Polars/Parquet). Do maximum potential WPM including all chars and navigation (backspace, del, arrows, etc.). Do an accuracy based correct / a total of chars (but not nav here). Do WPM as it's done now (net WPM to type the correct promp).
 - Better visualizations of speed and accuracy
