@@ -834,8 +834,7 @@ if __name__ == "__main__":
     # os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     # os.environ["QT_SCALE_FACTOR"] = "1"
     app = QtWidgets.QApplication([])
-    app.setStyle("Fusion")
-    # app.setPalette(app.style().standardPalette())
+    app.setStyle("windowsvista")
     loop = qasync.QEventLoop(app)
     asyncio.set_event_loop(loop)
     main_window = mainWindow()
