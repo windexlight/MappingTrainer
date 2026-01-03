@@ -714,7 +714,7 @@ class mainWindow(QtWidgets.QMainWindow):
             self.keysPressed = [x for x in self.keysPressed if k not in (x if isinstance(x, tuple) else (x,))]
         await self.updateKeysPressed()
 
-    @qasync.asyncSlot(list)
+    @qasync.asyncSlot(object)
     async def rawHidUpdate(self, keys):
         if self.rawhid.active:
             if self.settings.file.Mode == ModeValue.Key_Practice:

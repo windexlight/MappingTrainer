@@ -21,7 +21,7 @@ RAW_HID_READ_INTERVAL = int(1000/120)
 RAW_HID_TRY_CONNECT_INTERVAL = 500
 
 class RawHid(QObject):
-    keyEvent = Signal(list)
+    keyEvent = Signal(object)
     statusChanged = Signal()
 
     def __init__(self):
