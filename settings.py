@@ -1,7 +1,7 @@
 from PySide6.QtCore import QSettings, QStandardPaths, QByteArray
 from enum import Enum
 from pathlib import Path
-from typing import Any, Type, Protocol, Union
+from typing import Any, Type, Protocol, Union, get_args
 from dataclasses import dataclass, fields
 import re
 import hashlib
@@ -211,7 +211,7 @@ class Settings:
         try:
             if raw == "":
                 return None
-            elif issubclass(typ, Enum):
+            elif isinstance(typ, type) and issubclass(typ, Enum):
                 return typ[raw]
             elif typ is QByteArray:
                 if isinstance(raw, QByteArray) and raw.size() < 1024:
@@ -220,6 +220,11 @@ class Settings:
             elif typ is bool:
                 return str(raw).lower() in ("1", "true", "yes", "on")
             else:
+                if isinstance(typ, Union):
+                    types = [x for x in get_args(typ) if x != type(None)]
+                    if len(types) != 1:
+                        raise Exception()
+                    typ = types[0]
                 return typ(raw)
         except Exception:
             return default
