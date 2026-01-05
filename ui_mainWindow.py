@@ -90,6 +90,12 @@ class Ui_MainWindow(object):
         self.actionAdvance_On_Space = QAction(MainWindow)
         self.actionAdvance_On_Space.setObjectName(u"actionAdvance_On_Space")
         self.actionAdvance_On_Space.setCheckable(True)
+        self.actionN_Grams = QAction(MainWindow)
+        self.actionN_Grams.setObjectName(u"actionN_Grams")
+        self.actionN_Grams.setCheckable(True)
+        self.actionWords_w_N_Grams = QAction(MainWindow)
+        self.actionWords_w_N_Grams.setObjectName(u"actionWords_w_N_Grams")
+        self.actionWords_w_N_Grams.setCheckable(True)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -142,7 +148,7 @@ class Ui_MainWindow(object):
         font.setBold(False)
         self.label_keysPerSecond.setFont(font)
         self.label_keysPerSecond.setStyleSheet(u"color: #444; background: transparent;")
-        self.label_keysPerSecond.setAlignment(Qt.AlignCenter)
+        self.label_keysPerSecond.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.horizontalLayout_2.addWidget(self.label_keysPerSecond)
 
@@ -151,7 +157,7 @@ class Ui_MainWindow(object):
         self.label_line.setMaximumSize(QSize(135, 16777214))
         self.label_line.setFont(font)
         self.label_line.setStyleSheet(u"color: #444; background: transparent;")
-        self.label_line.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_line.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.horizontalLayout_2.addWidget(self.label_line)
 
@@ -206,7 +212,7 @@ class Ui_MainWindow(object):
 "          padding: 6px;\n"
 "          color: #222;\n"
 "         ")
-        self.label_keysPressed.setAlignment(Qt.AlignCenter)
+        self.label_keysPressed.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.horizontalLayout.addWidget(self.label_keysPressed)
 
@@ -303,7 +309,7 @@ class Ui_MainWindow(object):
 "        padding: 8px;\n"
 "        color: #222;\n"
 "      ")
-        self.label_keyPrompt.setAlignment(Qt.AlignCenter)
+        self.label_keyPrompt.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_keyPrompt.setWordWrap(True)
 
         self.verticalLayout.addWidget(self.label_keyPrompt)
@@ -311,7 +317,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 527, 35))
+        self.menubar.setGeometry(QRect(0, 0, 527, 31))
         self.menubar.setStyleSheet(u"\n"
 "        QMenuBar {\n"
 "            background-color: #f4f4f4;\n"
@@ -369,6 +375,8 @@ class Ui_MainWindow(object):
         self.menuMode.addAction(self.actionWords_Top_100)
         self.menuMode.addAction(self.actionWords_Top_1000)
         self.menuMode.addAction(self.actionWords_All)
+        self.menuMode.addAction(self.actionN_Grams)
+        self.menuMode.addAction(self.actionWords_w_N_Grams)
         self.menuOptions.addAction(self.actionSerif_Font)
         self.menuOptions.addAction(self.actionAdvance_On_Enter)
         self.menuOptions.addAction(self.actionAdvance_On_Space)
@@ -406,6 +414,8 @@ class Ui_MainWindow(object):
         self.pushButton_Minus.clicked.connect(MainWindow.minusButton)
         self.actionAdvance_On_Enter.toggled.connect(MainWindow.actionAdvanceOnEnter)
         self.actionAdvance_On_Space.toggled.connect(MainWindow.actionAdvanceOnSpace)
+        self.actionN_Grams.toggled.connect(MainWindow.actionModeTyping)
+        self.actionWords_w_N_Grams.toggled.connect(MainWindow.actionModeTyping)
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
@@ -430,6 +440,8 @@ class Ui_MainWindow(object):
         self.actionSerif_Font.setText(QCoreApplication.translate("MainWindow", u"Serif Font", None))
         self.actionAdvance_On_Enter.setText(QCoreApplication.translate("MainWindow", u"Advance On Enter", None))
         self.actionAdvance_On_Space.setText(QCoreApplication.translate("MainWindow", u"Advance On Space", None))
+        self.actionN_Grams.setText(QCoreApplication.translate("MainWindow", u"N-Grams", None))
+        self.actionWords_w_N_Grams.setText(QCoreApplication.translate("MainWindow", u"Words w/ N-Grams", None))
         self.pushButton_Minus.setText(QCoreApplication.translate("MainWindow", u"-", None))
         self.pushButton_Plus.setText(QCoreApplication.translate("MainWindow", u"+", None))
         self.label_keysPerSecond.setText(QCoreApplication.translate("MainWindow", u"--", None))

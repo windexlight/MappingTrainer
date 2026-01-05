@@ -29,6 +29,8 @@ class ModeValue(Enum):
     Words_Top_100 = "Words_Top_100"
     Words_Top_1000 = "Words_Top_1000"
     Words_All = "Words_All"
+    Words_Ngrams = "Words_Ngrams"
+    Words_Containing_Ngrams = "Words_Containing_Ngrams"
 
 class ModeSettings(Protocol):
     FontSize: int

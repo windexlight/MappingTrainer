@@ -27,6 +27,7 @@ from keynames import keynames
 from char_translations import *
 import combos
 from words_no_swears import words
+from ngrams import ngrams
 from rawhid import RawHid
 from highlighter import Highlighter
 from detect_code_info import detect_code_info, CodeInfo, IndentType
@@ -58,6 +59,8 @@ class mainWindow(QtWidgets.QMainWindow):
         self.modeActionGroup.addAction(self.ui.actionWords_Top_100)
         self.modeActionGroup.addAction(self.ui.actionWords_Top_1000)
         self.modeActionGroup.addAction(self.ui.actionWords_All)
+        self.modeActionGroup.addAction(self.ui.actionN_Grams)
+        self.modeActionGroup.addAction(self.ui.actionWords_w_N_Grams)
         self.ui.lineEdit.setVisible(False)
         self.ui.pushButton_Back.setVisible(False)
         self.ui.label_line.setVisible(False)
@@ -172,6 +175,10 @@ class mainWindow(QtWidgets.QMainWindow):
             self.ui.actionWords_Top_1000.setChecked(True)
         elif mode == ModeValue.Words_All:
             self.ui.actionWords_All.setChecked(True)
+        elif mode == ModeValue.Words_Ngrams:
+            self.ui.actionN_Grams.setChecked(True)
+        elif mode == ModeValue.Words_Containing_Ngrams:
+            self.ui.actionWords_w_N_Grams.setChecked(True)
 
         self._load_mode_settings()
 
@@ -258,6 +265,10 @@ class mainWindow(QtWidgets.QMainWindow):
                 self.settings.file.Mode = ModeValue.Words_Top_1000
             elif self.ui.actionWords_All.isChecked():
                 self.settings.file.Mode = ModeValue.Words_All
+            elif self.ui.actionN_Grams.isChecked():
+                self.settings.file.Mode = ModeValue.Words_Ngrams
+            elif self.ui.actionWords_w_N_Grams.isChecked():
+                self.settings.file.Mode = ModeValue.Words_Containing_Ngrams
 
             if self.ui.actionTyping_Practice.isChecked():
                 self.ui.label_line.setVisible(True)
@@ -268,20 +279,27 @@ class mainWindow(QtWidgets.QMainWindow):
                 lexer = self.settings.code_info.lexer
             else:
                 self.ui.label_line.setVisible(False)
-                _words = [x for x in words if len(x) > 1]
-                if self.ui.actionWords_Top_10.isChecked():
-                    self.last_mode = self.ui.actionWords_Top_10
-                    self.word_count = 10
-                elif self.ui.actionWords_Top_100.isChecked():
-                    self.last_mode = self.ui.actionWords_Top_100
-                    self.word_count = 100
-                elif self.ui.actionWords_Top_1000.isChecked():
-                    self.last_mode = self.ui.actionWords_Top_1000
-                    self.word_count = 1000
-                elif self.ui.actionWords_All.isChecked():
-                    self.last_mode = self.ui.actionWords_All
-                    self.word_count = len(_words)
-                self.promptLines = _words[:self.word_count]
+                if self.ui.actionN_Grams.isChecked():
+                    self.promptLines = ngrams
+                    self.word_count = len(self.promptLines)
+                elif self.ui.actionWords_w_N_Grams.isChecked():
+                    self.promptLines = [word for word in words if any(ngram in word for ngram in ngrams)]
+                    self.word_count = len(self.promptLines)
+                else:
+                    _words = [x for x in words if len(x) > 1]
+                    if self.ui.actionWords_Top_10.isChecked():
+                        self.last_mode = self.ui.actionWords_Top_10
+                        self.word_count = 10
+                    elif self.ui.actionWords_Top_100.isChecked():
+                        self.last_mode = self.ui.actionWords_Top_100
+                        self.word_count = 100
+                    elif self.ui.actionWords_Top_1000.isChecked():
+                        self.last_mode = self.ui.actionWords_Top_1000
+                        self.word_count = 1000
+                    elif self.ui.actionWords_All.isChecked():
+                        self.last_mode = self.ui.actionWords_All
+                        self.word_count = len(_words)
+                    self.promptLines = _words[:self.word_count]
                 self.initTypingPrompt(rand=True)
                 lexer = None
             if hasattr(self, "highlighter"):
@@ -564,7 +582,7 @@ class mainWindow(QtWidgets.QMainWindow):
             self.ui.lineEdit.clear()
         else:
             self.lineEditTextChanged()
-        if self.settings.file_settings.IsCode and len(self.promptLines[line]) >= len(self.last_indent):
+        if self.settings.file.Mode == ModeValue.Typing_Practice and self.settings.file_settings.IsCode and len(self.promptLines[line]) >= len(self.last_indent):
             self.ui.lineEdit.textCursor().insertText(self.last_indent)
         else:
             self.last_indent = ""

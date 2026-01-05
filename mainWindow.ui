@@ -90,7 +90,6 @@
          <font>
           <family>Cascadia Code</family>
           <pointsize>10</pointsize>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -101,7 +100,7 @@
          <string>--</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -117,7 +116,6 @@
          <font>
           <family>Cascadia Code</family>
           <pointsize>10</pointsize>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -128,7 +126,7 @@
          <string>99999 / 99999</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -209,7 +207,7 @@
          </string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -314,7 +312,7 @@
        <string>KEY TO TYPE</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignCenter</set>
+       <set>Qt::AlignmentFlag::AlignCenter</set>
       </property>
       <property name="wordWrap">
        <bool>true</bool>
@@ -329,7 +327,7 @@
      <x>0</x>
      <y>0</y>
      <width>527</width>
-     <height>35</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -380,6 +378,8 @@
     <addaction name="actionWords_Top_100"/>
     <addaction name="actionWords_Top_1000"/>
     <addaction name="actionWords_All"/>
+    <addaction name="actionN_Grams"/>
+    <addaction name="actionWords_w_N_Grams"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -577,6 +577,22 @@
    </property>
    <property name="text">
     <string>Advance On Space</string>
+   </property>
+  </action>
+  <action name="actionN_Grams">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>N-Grams</string>
+   </property>
+  </action>
+  <action name="actionWords_w_N_Grams">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Words w/ N-Grams</string>
    </property>
   </action>
  </widget>
@@ -946,6 +962,38 @@
    <signal>toggled(bool)</signal>
    <receiver>MainWindow</receiver>
    <slot>actionAdvanceOnSpace(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>172</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionN_Grams</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>actionModeTyping(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>172</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionWords_w_N_Grams</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>actionModeTyping(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
