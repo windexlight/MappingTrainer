@@ -19,6 +19,10 @@ Python utility to practice new keyboard mappings and type-read books.
 
 ## TODO
 
+Bugs:
+- Hitting alt-left in word mode needs to be disabled.
+
+Features:
 - Allow selection between indentation styles in case auto-detection doesn't work
 - Add an options dialog
 - Save stats in a database of some kind (DuckDB or Polars/Parquet). Do maximum potential WPM including all chars and navigation (backspace, del, arrows, etc.). Do an accuracy based correct / a total of chars (but not nav here). Do WPM as it's done now (net WPM to type the correct promp).
