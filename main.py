@@ -283,7 +283,13 @@ class mainWindow(QtWidgets.QMainWindow):
                     self.promptLines = ngrams
                     self.word_count = len(self.promptLines)
                 elif self.ui.actionWords_w_N_Grams.isChecked():
+                    spc_words = [" " + word for word in words]
+                    com_words = [", " + word for word in words]
+                    spc_ngrams = [ngram for ngram in ngrams if ngram.startswith(" ")]
+                    com_ngrams = [ngram for ngram in ngrams if ngram.startswith(", ")]
                     self.promptLines = [word for word in words if any(ngram in word for ngram in ngrams)]
+                    self.promptLines.extend(word for word in spc_words if any(word.startswith(ngram) for ngram in spc_ngrams))
+                    self.promptLines.extend(word for word in com_words if any(word.startswith(ngram) for ngram in com_ngrams))
                     self.word_count = len(self.promptLines)
                 else:
                     _words = [x for x in words if len(x) > 1]
