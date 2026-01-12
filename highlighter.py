@@ -1,6 +1,48 @@
 from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QFont
 from pygments.token import Token
+from pygments.lexer import RegexLexer
 from pygments import lex
+import re
+from ngrams import ngrams
+
+
+def make_ngram_lexer(ngrams, token=Token.Name.Tag, ignore_case=False):
+    flags = re.IGNORECASE if ignore_case else re.RegexFlag(0)
+    clean = []
+    for s in ngrams:
+        if not isinstance(s, str):
+            continue
+        s = s.strip()
+        if s:
+            clean.append(s)
+
+    clean = sorted(clean, key=len, reverse=True)
+
+    if not clean:
+        class _EmptyLexer(RegexLexer):
+            name = "EmptyNgramLexer"
+            tokens = {
+                'root': [
+                    (r'.+', Token.Text),
+                ]
+            }
+        return _EmptyLexer()
+
+    escaped = [re.escape(s) for s in clean]
+    pattern = r'(' + '|'.join(escaped) + r')'
+
+    class _NgramLexer(RegexLexer):
+        name = "NgramLexer"
+        tokens = {
+            'root': [
+                (pattern, token),
+                (r'.', Token.Text),
+            ]
+        }
+    _NgramLexer.flags = flags
+
+    return _NgramLexer()
+
 
 class Highlighter(QSyntaxHighlighter):
     def __init__(self, document, *, invert=False, lexer=None):
@@ -103,6 +145,8 @@ class Highlighter(QSyntaxHighlighter):
         return fmt
 
     def set_lexer(self, lexer):
+        if lexer is None:
+            lexer = make_ngram_lexer(ngrams)
         self.lexer = lexer
 
     def highlightBlock(self, text):
@@ -128,3 +172,4 @@ class Highlighter(QSyntaxHighlighter):
                 if self.n > 0 and len(text) > 0:
                     length = min(self.n, len(text))
                     self.setFormat(0, length, self.text_char_format)
+

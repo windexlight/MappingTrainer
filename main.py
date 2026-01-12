@@ -147,8 +147,10 @@ class mainWindow(QtWidgets.QMainWindow):
             self._loadTypingPromptFile(filename=self.settings.file.Filename)
 
         lexer = self.settings.code_info.lexer
-        self.highlighter = Highlighter(self.ui.textedit_keyPrompt.document(), lexer=lexer)
-        self.edit_highlighter = Highlighter(self.ui.lineEdit.document(), invert=True, lexer=lexer)
+        self.highlighter = Highlighter(self.ui.textedit_keyPrompt.document())
+        self.edit_highlighter = Highlighter(self.ui.lineEdit.document(), invert=True)
+        self.highlighter.set_lexer(lexer)
+        self.edit_highlighter.set_lexer(lexer)
 
         self.initializing_key_flags = True
         self.ui.actionCombos.setChecked(self.settings.key_practice.Combos)
