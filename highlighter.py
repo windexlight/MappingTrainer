@@ -12,7 +12,6 @@ def make_ngram_lexer(ngrams, token=Token.Name.Tag, ignore_case=False):
     for s in ngrams:
         if not isinstance(s, str):
             continue
-        s = s.strip()
         if s:
             clean.append(s)
 
