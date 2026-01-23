@@ -29,9 +29,11 @@ import combos
 from words_no_swears import words
 from ngrams import ngrams
 from rawhid import RawHid
-from highlighter import Highlighter
+from highlighter import Highlighter, make_ngram_lexer
 from detect_code_info import detect_code_info, CodeInfo, IndentType
 from settings import Settings, ModeValue
+from ngrams import ngrams
+
 
 QT_MODS = [Qt.KeyboardModifier.ControlModifier, Qt.KeyboardModifier.ShiftModifier, Qt.KeyboardModifier.AltModifier, Qt.KeyboardModifier.MetaModifier]
 
@@ -149,7 +151,7 @@ class mainWindow(QtWidgets.QMainWindow):
         lexer = self.settings.code_info.lexer
         self.highlighter = Highlighter(self.ui.textedit_keyPrompt.document())
         self.edit_highlighter = Highlighter(self.ui.lineEdit.document(), invert=True)
-        self.highlighter.set_lexer(lexer)
+        self.highlighter.set_lexer(lexer or make_ngram_lexer(ngrams))
         self.edit_highlighter.set_lexer(lexer)
 
         self.initializing_key_flags = True
@@ -311,7 +313,7 @@ class mainWindow(QtWidgets.QMainWindow):
                 self.initTypingPrompt(rand=True)
                 lexer = None
             if hasattr(self, "highlighter"):
-                self.highlighter.set_lexer(lexer)
+                self.highlighter.set_lexer(lexer or make_ngram_lexer(ngrams))
                 self.highlighter.rehighlight()
             if hasattr(self, "edit_highlighter"):
                 self.edit_highlighter.set_lexer(lexer)
@@ -487,7 +489,7 @@ class mainWindow(QtWidgets.QMainWindow):
             self.settings.set_code_info(code_info)
 
         if hasattr(self, "highlighter"):
-            self.highlighter.set_lexer(code_info.lexer)
+            self.highlighter.set_lexer(code_info.lexer or make_ngram_lexer(ngrams))
         if hasattr(self, "edit_highlighter"):
             self.edit_highlighter.set_lexer(code_info.lexer)
         if code_info.is_code:

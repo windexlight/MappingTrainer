@@ -3,7 +3,6 @@ from pygments.token import Token
 from pygments.lexer import RegexLexer
 from pygments import lex
 import re
-from ngrams import ngrams
 
 
 def make_ngram_lexer(ngrams, token=Token.Name.Tag, ignore_case=False):
@@ -144,8 +143,6 @@ class Highlighter(QSyntaxHighlighter):
         return fmt
 
     def set_lexer(self, lexer):
-        if lexer is None:
-            lexer = make_ngram_lexer(ngrams)
         self.lexer = lexer
 
     def highlightBlock(self, text):
