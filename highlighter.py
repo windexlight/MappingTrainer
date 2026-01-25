@@ -14,6 +14,7 @@ def make_ngram_lexer(ngrams, token=Token.Name.Tag, ignore_case=False):
         if s:
             clean.append(s)
 
+    clean.extend("^" + s[1:] for s in clean if s[0] == " ")
     clean = sorted(clean, key=len, reverse=True)
 
     if not clean:
@@ -27,6 +28,7 @@ def make_ngram_lexer(ngrams, token=Token.Name.Tag, ignore_case=False):
         return _EmptyLexer()
 
     escaped = [re.escape(s) for s in clean]
+    escaped = ["^" + s[2:] if s[0:2] == '\\^' else s for s in escaped]
     pattern = r'(' + '|'.join(escaped) + r')'
 
     class _NgramLexer(RegexLexer):
