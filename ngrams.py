@@ -45,7 +45,7 @@ ngrams = [
     ", but",
     ", and",
     "'ll",
-    "'ve"
+    "'ve",
     "I'",
     "I'll",
     "I've",
