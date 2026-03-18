@@ -128,8 +128,6 @@ class RawHid(QObject):
         self.keys = [k for k in self.keys if not any(x in released for x in (k if isinstance(k, tuple) else (k,)))]
         self.keys.extend(pressed if not self.mods else ((*self.mods, x) for x in pressed))
         mods_pressed = [x for x in self.mods if not self.keys or not all(x in (y if isinstance(y, tuple) else (y,)) for y in self.keys)]
-        # TODO - logging f"[] --- [(<scancode.LCtrl: 29>, <scancode.LShift: 42>, <scancode.BackslashPipe: 43>)]" here at point of exception.
-        # why is self.keys a tuple here?
         self.keys = [*mods_pressed, *self.keys]
         self.keyEvent.emit(self.keys)
 
