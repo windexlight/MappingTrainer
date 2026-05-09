@@ -4,6 +4,7 @@ import qasync
 from time import time
 from PySide6.QtCore import QTimer, QObject, Signal
 from typing import List, Tuple
+from datetime import datetime
 
 from keycodes import *
 from scancodes import *
@@ -134,6 +135,7 @@ class RawHid(QObject):
         self.mods = [keycodeToScancode(i+keycode.KC_LEFT_CTRL.value) for i in range(RAW_HID_MODS)
                      if (mods & (1 << i)) > 0]
         keys = report[1:]
+        print(datetime.now().isoformat(), self.mods, [keycodeToScancode(i) for i in self.relevant_keycodes if key_bit_set(i, keys)])
         pressed = [keycodeToScancode(i) for i in self.relevant_keycodes
                    if key_bit_set(i, keys) and not key_bit_set(i, self.key_bits)]
         released = [keycodeToScancode(i) for i in self.relevant_keycodes
