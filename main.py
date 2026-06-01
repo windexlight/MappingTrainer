@@ -28,7 +28,7 @@ from char_translations import *
 import combos
 from words_no_swears import words
 from ngrams import ngrams
-from rawhid import RawHid
+# from rawhid import RawHid
 from highlighter import Highlighter, make_ngram_lexer
 from detect_code_info import detect_code_info, CodeInfo, IndentType
 from settings import Settings, ModeValue
@@ -102,9 +102,9 @@ class mainWindow(QtWidgets.QMainWindow):
         self.word_count = 0
         self.last_mode = self.ui.actionKey_Practice
 
-        self.rawhid = RawHid()
-        self.rawhid.keyEvent.connect(self.rawHidUpdate)
-        self.rawhid.statusChanged.connect(self.rawHidStatusChanged)
+        # self.rawhid = RawHid()
+        # self.rawhid.keyEvent.connect(self.rawHidUpdate)
+        # self.rawhid.statusChanged.connect(self.rawHidStatusChanged)
 
         self.blocker = AltBlocker(self)
         self.menuBar().installEventFilter(self.blocker)
@@ -228,7 +228,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def actionModeKey(self, state: bool):
         if state:
-            self.rawhid.start()
+            # self.rawhid.start()
             self.ui.textedit_keyPrompt.setVisible(False)
             self.ui.label_keyPrompt.setVisible(True)
             self.ui.label_keysPressed.setText("")
@@ -250,7 +250,7 @@ class mainWindow(QtWidgets.QMainWindow):
                         self.last_mode.setChecked(True)
                         return
 
-            self.rawhid.stop()
+            # self.rawhid.stop()
             self.ui.label_keyPrompt.setVisible(False)
             self.ui.textedit_keyPrompt.setVisible(True)
             self.ui.lineEdit.setVisible(True)
@@ -709,18 +709,18 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def eventFilter(self, source, event: QKeyEvent):
         if (t := event.type()) in [QEvent.Type.KeyPress, QEvent.Type.KeyRelease]:
-            if not self.rawhid.active:
-                if self.settings.file.Mode == ModeValue.Key_Practice:
-                    if not event.isAutoRepeat():
-                        sc = event.nativeScanCode()
-                        if not (k := processScancode(sc)):
-                            print(F"Unrecognized scancode {sc}")
+            # if not self.rawhid.active:
+            if self.settings.file.Mode == ModeValue.Key_Practice:
+                if not event.isAutoRepeat():
+                    sc = event.nativeScanCode()
+                    if not (k := processScancode(sc)):
+                        print(F"Unrecognized scancode {sc}")
+                    else:
+                        if t == QEvent.Type.KeyPress:
+                            asyncio.create_task(self.handle_key_pressed(k, event.modifiers()))
                         else:
-                            if t == QEvent.Type.KeyPress:
-                                asyncio.create_task(self.handle_key_pressed(k, event.modifiers()))
-                            else:
-                                asyncio.create_task(self.handle_key_released(k))
-                    return True
+                            asyncio.create_task(self.handle_key_released(k))
+                return True
         return False
 
     async def handle_key_pressed(self, k: scancode, mods):
@@ -742,18 +742,18 @@ class mainWindow(QtWidgets.QMainWindow):
             self.keysPressed = [x for x in self.keysPressed if k not in (x if isinstance(x, tuple) else (x,))]
         await self.updateKeysPressed()
 
-    @qasync.asyncSlot(object)
-    async def rawHidUpdate(self, keys):
-        if self.rawhid.active:
-            if self.settings.file.Mode == ModeValue.Key_Practice:
-                self.keysPressed = keys
-                await self.updateKeysPressed()
+    # @qasync.asyncSlot(object)
+    # async def rawHidUpdate(self, keys):
+    #     if self.rawhid.active:
+    #         if self.settings.file.Mode == ModeValue.Key_Practice:
+    #             self.keysPressed = keys
+    #             await self.updateKeysPressed()
 
-    def rawHidStatusChanged(self):
-        if self.rawhid.active:
-            self.status_label.setText("QMK Direct Mode")
-        else:
-            self.status_label.setText("Standard Mode")
+    # def rawHidStatusChanged(self):
+    #     if self.rawhid.active:
+    #         self.status_label.setText("QMK Direct Mode")
+    #     else:
+    #         self.status_label.setText("Standard Mode")
 
     def makeKeyString(self, keys):
         return '+'.join(keynames.get(k) or (F"({self.makeKeyString(k)})" if isinstance(k, tuple) else "UnknownKey") for k in keys)
