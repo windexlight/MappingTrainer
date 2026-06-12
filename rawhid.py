@@ -38,7 +38,8 @@ class RawHid(QObject):
         self.start_report = bytes(request_data)
         request_data[1] = 0xBF
         self.stop_report = bytes(request_data)
-        self.heartbeat_report = self.start_report
+        request_data[1] = 0xC0
+        self.heartbeat_report = bytes(request_data)
         self.last_heartbeat_time = 0
         self.active = False
 
@@ -58,16 +59,30 @@ class RawHid(QObject):
         self.try_connect()
 
     def start(self):
-        self.heartbeat_report = self.start_report
         self.hid_send_timer.stop()
         self.hid_send_timer.start()
         self.hid_heartbeat()
+        if not self.active:
+            self.active = True
+            self.statusChanged.emit()
+        if self.dev is not None:
+            try:
+                self.dev.write(self.start_report)
+            except:
+                self.close()
 
     def stop(self):
-        self.heartbeat_report = self.stop_report
+        if self.dev is not None:
+            try:
+                self.dev.write(self.stop_report)
+            except:
+                self.close()
         self.hid_send_timer.stop()
         self.hid_send_timer.start()
         self.hid_heartbeat()
+        if self.active:
+            self.active = False
+            self.statusChanged.emit()
 
     def try_connect(self):
         device_interfaces = hid.enumerate(RAW_HID_VENDOR_ID, RAW_HID_PRODUCT_ID)
@@ -88,10 +103,10 @@ class RawHid(QObject):
                     self.process_raw_hid_report(report)
             except:
                 self.close()
-            if (time() - self.last_heartbeat_time) > 1.5:
-                if self.active:
-                    self.active = False
-                    self.statusChanged.emit()
+            # if (time() - self.last_heartbeat_time) > 1.5:
+            #     if self.active:
+            #         self.active = False
+            #         self.statusChanged.emit()
         else:
             self.try_connect()
 

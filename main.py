@@ -203,6 +203,7 @@ class mainWindow(QtWidgets.QMainWindow):
             self.ui.actionSerif_Font.setVisible(False)
         if kp := (self.settings.file.Mode == ModeValue.Key_Practice):
             self.setKeyPracticeFontSize(self.settings.key_practice.FontSize)
+            self.rawhid.start()
         elif self.settings.file.Mode == ModeValue.Typing_Practice:
             if self.settings.file_settings.IsCode:
                 self.setCodeFontSize(self.settings.code.FontSize)
@@ -213,6 +214,7 @@ class mainWindow(QtWidgets.QMainWindow):
         self.ui.actionAdvance_On_Enter.setVisible(not kp)
         self.ui.actionAdvance_On_Space.setVisible(not kp)
         if not kp:
+            self.rawhid.stop()
             ms = self.settings.mode_settings
             self.ui.actionAdvance_On_Enter.setChecked(ms.AdvanceOnEnter)
             self.ui.actionAdvance_On_Space.setChecked(ms.AdvanceOnSpace)
@@ -228,7 +230,6 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def actionModeKey(self, state: bool):
         if state:
-            self.rawhid.start()
             self.ui.textedit_keyPrompt.setVisible(False)
             self.ui.label_keyPrompt.setVisible(True)
             self.ui.label_keysPressed.setText("")
@@ -250,7 +251,6 @@ class mainWindow(QtWidgets.QMainWindow):
                         self.last_mode.setChecked(True)
                         return
 
-            self.rawhid.stop()
             self.ui.label_keyPrompt.setVisible(False)
             self.ui.textedit_keyPrompt.setVisible(True)
             self.ui.lineEdit.setVisible(True)
