@@ -5,45 +5,6 @@ from pygments import lex
 import re
 
 
-def make_ngram_lexer(ngrams, token=Token.Name.Tag, ignore_case=False):
-    flags = re.IGNORECASE if ignore_case else re.RegexFlag(0)
-    clean = []
-    for s in ngrams:
-        if not isinstance(s, str):
-            continue
-        if s:
-            clean.append(s)
-
-    clean.extend("^" + s[1:] for s in clean if s[0] == " ")
-    clean = sorted(clean, key=len, reverse=True)
-
-    if not clean:
-        class _EmptyLexer(RegexLexer):
-            name = "EmptyNgramLexer"
-            tokens = {
-                'root': [
-                    (r'.+', Token.Text),
-                ]
-            }
-        return _EmptyLexer()
-
-    escaped = [re.escape(s) for s in clean]
-    escaped = ["^" + s[2:] if s[0:2] == '\\^' else s for s in escaped]
-    pattern = r'(' + '|'.join(escaped) + r')'
-
-    class _NgramLexer(RegexLexer):
-        name = "NgramLexer"
-        tokens = {
-            'root': [
-                (pattern, token),
-                (r'.', Token.Text),
-            ]
-        }
-    _NgramLexer.flags = flags
-
-    return _NgramLexer()
-
-
 class Highlighter(QSyntaxHighlighter):
     def __init__(self, document, *, invert=False, lexer=None):
         super().__init__(document)
